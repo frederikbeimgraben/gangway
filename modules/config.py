@@ -44,6 +44,11 @@ class GANGWAYConfig:
     OFFSET_Y: int
     LEDS: List[LED]
     ANIMATION: Animation | RGBCCT
+    MQTT_HOST: str
+    MQTT_PORT: int
+    MQTT_USERNAME: str | None
+    MQTT_PASSWORD: str | None
+    MQTT_TOPIC_PREFIX: str
 
     def __init__(self, path: Path):
         self._lock = threading.Lock()
@@ -94,6 +99,13 @@ class GANGWAYConfig:
             ]
 
             self.ANIMATION = self._parse_animation(config.get("animation", {}))
+
+            mqtt_config = config.get("mqtt", {})
+            self.MQTT_HOST = mqtt_config.get("host", "localhost")
+            self.MQTT_PORT = mqtt_config.get("port", 1883)
+            self.MQTT_USERNAME = mqtt_config.get("username")
+            self.MQTT_PASSWORD = mqtt_config.get("password")
+            self.MQTT_TOPIC_PREFIX = mqtt_config.get("topic_prefix", "gangway")
 
     def save(self):
         with self._lock:

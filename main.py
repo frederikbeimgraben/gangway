@@ -8,6 +8,7 @@ import uvicorn
 from modules import config
 from modules.api import app
 from modules.led_controller import LEDController
+from modules.mqtt import MQTTHandler
 from modules.state import STATE
 from modules.xovis.server import XOVISServer
 
@@ -39,6 +40,10 @@ async def main():
 
     xovis_http_server = xovis_server.start_server()
 
+    # Start MQTT Handler
+    mqtt_handler = MQTTHandler()
+    mqtt_task = asyncio.create_task(mqtt_handler.start())
+
     # --- Start Uvicorn (Blocking Mode) ---
     # We let Uvicorn control the loop. It handles Ctrl+C automatically.
     config_uvicorn = uvicorn.Config(app, host="0.0.0.0", port=8082, log_level="info")
@@ -61,6 +66,12 @@ async def main():
             print("XOVIS callback handler stopped.")
         except Exception as e:
             print(f"Error stopping Xovis: {e}")
+
+        try:
+            mqtt_task.cancel()
+            print("MQTT Handler stopped.")
+        except Exception as e:
+            print(f"Error stopping MQTT Handler: {e}")
 
         try:
             STATE.led_controller.stop()
