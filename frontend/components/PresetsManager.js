@@ -1,4 +1,5 @@
 import { useState } from "react";
+import AnimationEditor from "./AnimationEditor";
 
 // Simple Icons to avoid external dependencies
 const PlayIcon = ({ className }) => (
@@ -14,6 +15,23 @@ const PlayIcon = ({ className }) => (
             strokeLinecap="round"
             strokeLinejoin="round"
             d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
+        />
+    </svg>
+);
+
+const EditIcon = ({ className }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className={className}
+    >
+        <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
         />
     </svg>
 );
@@ -54,12 +72,15 @@ const PlusIcon = ({ className }) => (
 
 export default function PresetsManager({
     presets = [],
+    animations = [],
     onPresetLoaded,
     onPresetsChanged,
     showSnackbar,
 }) {
     const [newPresetName, setNewPresetName] = useState("");
     const [loading, setLoading] = useState(false);
+    const [editingPresetName, setEditingPresetName] = useState(null);
+    const [editingConfig, setEditingConfig] = useState(null);
 
     const handleSavePreset = async () => {
         const name = newPresetName.trim();
@@ -87,6 +108,54 @@ export default function PresetsManager({
         } catch (error) {
             console.error(error);
             showSnackbar?.("Error saving preset", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleEditPreset = async (name) => {
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/presets/${name}`);
+            if (res.ok) {
+                const data = await res.json();
+                setEditingPresetName(name);
+                setEditingConfig(data.animation);
+            } else {
+                showSnackbar?.("Failed to load preset data", "error");
+            }
+        } catch (error) {
+            console.error(error);
+            showSnackbar?.("Error loading preset data", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSaveEditedPreset = async () => {
+        if (!editingPresetName || !editingConfig) return;
+        setLoading(true);
+        try {
+            const res = await fetch(`/api/presets/${editingPresetName}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(editingConfig),
+            });
+            if (res.ok) {
+                showSnackbar?.(
+                    `Preset '${editingPresetName}' updated`,
+                    "success",
+                );
+                setEditingPresetName(null);
+                setEditingConfig(null);
+                onPresetsChanged?.();
+            } else {
+                const err = await res.json();
+                showSnackbar?.(`Failed to update: ${err.detail}`, "error");
+            }
+        } catch (error) {
+            console.error(error);
+            showSnackbar?.("Error updating preset", "error");
         } finally {
             setLoading(false);
         }
@@ -195,6 +264,15 @@ export default function PresetsManager({
                                 </button>
                                 <button
                                     type="button"
+                                    onClick={() => handleEditPreset(name)}
+                                    disabled={loading}
+                                    className="p-2 text-blue-400 hover:bg-gray-500 rounded-md transition-colors"
+                                    title="Edit Preset"
+                                >
+                                    <EditIcon className="w-5 h-5" />
+                                </button>
+                                <button
+                                    type="button"
                                     onClick={() => handleDeletePreset(name)}
                                     disabled={loading}
                                     className="p-2 text-red-400 hover:bg-gray-500 rounded-md transition-colors"
@@ -207,6 +285,62 @@ export default function PresetsManager({
                     ))
                 )}
             </div>
+
+            {/* Edit Modal */}
+            {editingPresetName && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                    <div className="bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col border border-gray-700">
+                        <div className="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-900 rounded-t-lg">
+                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                <EditIcon className="w-5 h-5 text-blue-400" />
+                                Editing:{" "}
+                                <span className="text-teal-400">
+                                    {editingPresetName}
+                                </span>
+                            </h3>
+                            <button
+                                onClick={() => {
+                                    setEditingPresetName(null);
+                                    setEditingConfig(null);
+                                }}
+                                className="text-gray-400 hover:text-white transition-colors"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="p-6 overflow-y-auto flex-1">
+                            <AnimationEditor
+                                config={editingConfig}
+                                onChange={(newConfig) =>
+                                    setEditingConfig(newConfig)
+                                }
+                                allAnimations={animations}
+                                availableAnimations={animations}
+                                presets={presets}
+                                isRoot={true}
+                            />
+                        </div>
+                        <div className="p-4 border-t border-gray-700 flex justify-end gap-2 bg-gray-900 rounded-b-lg">
+                            <button
+                                onClick={() => {
+                                    setEditingPresetName(null);
+                                    setEditingConfig(null);
+                                }}
+                                className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handleSaveEditedPreset}
+                                disabled={loading}
+                                className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-500 disabled:opacity-50 transition-colors"
+                            >
+                                {loading ? "Saving..." : "Save Changes"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

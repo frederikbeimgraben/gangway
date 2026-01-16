@@ -234,6 +234,7 @@ export default function Home() {
 
                                 <PresetsManager
                                     presets={presets}
+                                    animations={animations}
                                     onPresetsChanged={fetchData}
                                     onPresetLoaded={fetchData}
                                     showSnackbar={showSnackbar}
