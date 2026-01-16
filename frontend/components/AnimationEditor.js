@@ -561,7 +561,7 @@ function ParamInput({ param, value, onChange, allAnimations }) {
                 onChange={handleChange}
                 onBlur={handleBlur}
                 className="w-[calc(100%-2.5rem)] bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none invalid:!border-red-500 invalid:!text-red-500"
-                step={isInt ? "1" : "0.1"}
+                step={isInt ? "1" : "any"}
                 {...(param.min !== null && { min: param.min })}
                 {...(param.max !== null && { max: param.max })}
             />
