@@ -53,14 +53,14 @@ strips:
   - 105.0
   - 43.0
 - index: 49
-  len: 24
+  len: 23
   start:
   - 98.0
   - 14.0
   end:
   - 25.0
   - 197.0
-- index: 73
+- index: 71
   len: 24
   start:
   - 66.0
@@ -115,17 +115,15 @@ animation:
     primary:
       rave: {}
     secondary:
-      smooth:
+      persist:
         animation:
           alternate:
             animations:
             - paint:
                 primary:
-                  r: 255
-                  g: 0
-                  b: 0
-                  cw: 0
-                  ww: 0
+                  plasma:
+                    speed: 0.5
+                    scale: 0.1
                 secondary:
                   r: 153
                   g: 193
@@ -134,44 +132,5 @@ animation:
                   ww: 0
                 radius: 30.0
                 persistence: 2.0
-            - proximity_speed:
-                animation:
-                  proximity:
-                    primary:
-                      blend:
-                        animations:
-                        - swing:
-                            color:
-                              r: 255
-                              g: 255
-                              b: 255
-                              cw: 255
-                              ww: 0
-                            direction: y
-                            wavelength: 50
-                            speed: 10.0
-                        - static:
-                            color:
-                              r: 255
-                              g: 0
-                              b: 0
-                              cw: 0
-                              ww: 0
-                        mode: max
-                    secondary:
-                      r: 255
-                      g: 0
-                      b: 0
-                      cw: 0
-                      ww: 0
-                    x: 0.0
-                    y: 0.0
-                    radius: 200.0
-                x: 0.0
-                y: 0.0
-                radius: 200.0
-                multiplier: 1.0
-                mode: speed up
-                proximity_factor: 0.5
-            length: 10.0
-        smoothing: 0.7
+            length: 30.0
+        duration: 0.1

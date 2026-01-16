@@ -331,7 +331,7 @@ def rave() -> Animation:
             RGBCCT(cw=255),
             RGBCCT(),
         ],
-        frequency=25,
+        frequency=75,
     )
 
     # 2. Fast Rainbow

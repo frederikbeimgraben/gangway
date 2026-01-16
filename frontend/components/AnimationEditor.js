@@ -81,7 +81,7 @@ export default function AnimationEditor({
                 <select
                     value={selectedAnimName}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    className="w-full bg-gray-700 text-white rounded px-3 py-2 outline-none text-sm focus:ring-0"
+                    className="w-[calc(100%-2.5rem)] bg-gray-700 text-white rounded px-3 py-2 outline-none text-sm focus:ring-0"
                 >
                     <option value="" disabled>
                         Select Animation
@@ -178,7 +178,7 @@ const ColorInputs = ({ value: colorValue, onChange: onColorChange }) => {
     };
 
     return (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 w-[calc(100%-2.5rem)]">
             {/* Color Picker Button */}
             <div className="relative w-8 h-8 shrink-0">
                 <input
@@ -196,7 +196,7 @@ const ColorInputs = ({ value: colorValue, onChange: onColorChange }) => {
             </div>
 
             {/* Numeric Inputs */}
-            <div className="grid grid-cols-5 gap-1 flex-1">
+            <div className="grid grid-cols-5 gap-1 flex-1 w-[calc(100%-2.5rem)]">
                 {["r", "g", "b", "cw", "ww"].map((chan) => (
                     <input
                         key={chan}
@@ -286,12 +286,12 @@ function ParamInput({ param, value, onChange, allAnimations }) {
                 {list.map((item, idx) => (
                     <div
                         key={idx}
-                        className="bg-gray-800 p-3 rounded relative pr-10"
+                        className="bg-gray-800 rounded relative py-1"
                     >
                         <button
                             type="button"
                             onClick={() => removeItem(idx)}
-                            className="absolute top-2 right-2 text-red-400 hover:text-red-300"
+                            className="absolute top-5 right-2 text-red-400 hover:text-red-300"
                             aria-label="Remove"
                             title="Remove"
                         >
@@ -334,7 +334,7 @@ function ParamInput({ param, value, onChange, allAnimations }) {
                 onChange(list.filter((_, i) => i !== idx));
 
             return (
-                <div className="space-y-2">
+                <div className="space-y-2 w-[calc(100%-2.5rem)]">
                     {list.map((item, idx) => (
                         <div key={idx} className="flex gap-2 items-center">
                             <div className="flex-1">
@@ -383,12 +383,12 @@ function ParamInput({ param, value, onChange, allAnimations }) {
                     {list.map((item, idx) => (
                         <div
                             key={idx}
-                            className="bg-gray-800 p-3 rounded relative pr-10"
+                            className="bg-gray-800 rounded relative py-1"
                         >
                             <button
                                 type="button"
                                 onClick={() => removeItem(idx)}
-                                className="absolute top-2 right-2 text-red-400 hover:text-red-300"
+                                className="absolute top-5 right-2 text-red-400 hover:text-red-300"
                                 aria-label="Remove"
                                 title="Remove"
                             >
@@ -452,7 +452,7 @@ function ParamInput({ param, value, onChange, allAnimations }) {
                 {mode === "color" ? (
                     <ColorInputs value={value} onChange={onChange} />
                 ) : (
-                    <div className="bg-gray-800 p-3 rounded">
+                    <div className="bg-gray-800 rounded py-1">
                         <AnimationEditor
                             config={value || {}}
                             onChange={onChange}
@@ -472,7 +472,7 @@ function ParamInput({ param, value, onChange, allAnimations }) {
             <select
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none"
+                className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none w-[calc(100%-2.5rem)]"
             >
                 {options.map((opt) => (
                     <option key={opt} value={opt}>
@@ -512,7 +512,7 @@ function ParamInput({ param, value, onChange, allAnimations }) {
                 type="time"
                 value={value ?? ""}
                 onChange={(e) => onChange(e.target.value)}
-                className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none [color-scheme:dark]"
+                className="w-[calc(100%-2.5rem)] bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none [color-scheme:dark]"
             />
         );
     }
@@ -560,7 +560,7 @@ function ParamInput({ param, value, onChange, allAnimations }) {
                 value={value ?? ""}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none invalid:!border-red-500 invalid:!text-red-500"
+                className="w-[calc(100%-2.5rem)] bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none invalid:!border-red-500 invalid:!text-red-500"
                 step={isInt ? "1" : "0.1"}
                 {...(param.min !== null && { min: param.min })}
                 {...(param.max !== null && { max: param.max })}
@@ -574,7 +574,7 @@ function ParamInput({ param, value, onChange, allAnimations }) {
             type="text"
             value={value ?? ""}
             onChange={(e) => onChange(e.target.value)}
-            className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none"
+            className="w-[calc(100%-2.5rem)] bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none"
         />
     );
 }

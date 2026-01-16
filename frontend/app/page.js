@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Visualization from "../components/Visualization";
 import AnimationEditor from "../components/AnimationEditor";
+import PresetsManager from "../components/PresetsManager";
 import Image from "next/image";
 
 export default function Home() {
@@ -30,25 +31,26 @@ export default function Home() {
     };
 
     // Initial Fetch
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const [configRes, animRes] = await Promise.all([
-                    fetch("/api/config/"),
-                    fetch("/api/animations/"),
-                ]);
-                const configData = await configRes.json();
-                const animData = await animRes.json();
+    const fetchData = async () => {
+        try {
+            const [configRes, animRes] = await Promise.all([
+                fetch("/api/config/"),
+                fetch("/api/animations/"),
+            ]);
+            const configData = await configRes.json();
+            const animData = await animRes.json();
 
-                setConfig(configData);
-                setRawConfigString(JSON.stringify(configData, null, 2));
-                setAnimations(animData);
-                setLoading(false);
-            } catch (e) {
-                console.error("Failed to load data", e);
-                setLoading(false);
-            }
-        };
+            setConfig(configData);
+            setRawConfigString(JSON.stringify(configData, null, 2));
+            setAnimations(animData);
+            setLoading(false);
+        } catch (e) {
+            console.error("Failed to load data", e);
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
         fetchData();
     }, []);
 
@@ -224,6 +226,11 @@ export default function Home() {
                                         isRoot={true}
                                     />
                                 </div>
+
+                                <PresetsManager
+                                    onPresetLoaded={fetchData}
+                                    showSnackbar={showSnackbar}
+                                />
                             </form>
                         </div>
                     </div>
