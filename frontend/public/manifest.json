@@ -1,0 +1,22 @@
+{
+    "name": "Gangway",
+    "short_name": "Gangway",
+    "description": "Gangway Controller",
+    "icons": [
+        {
+            "src": "/icons/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/icons/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#1f2937",
+    "background_color": "#111827",
+    "start_url": "/",
+    "display": "standalone",
+    "orientation": "portrait"
+}
