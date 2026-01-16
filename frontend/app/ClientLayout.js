@@ -1,12 +1,12 @@
-"use client";
+'use client';
 
-import { Suspense } from "react";
-import { ApiKeyWrapper } from "./ApiKeyWrapper";
+import { Suspense } from 'react';
+import { ApiKeyWrapper } from './ApiKeyWrapper';
 
-export default function ClientLayout({ children, onApiKeySet }) {
+export default function ClientLayout({ children }) {
     return (
         <Suspense fallback={<div>Loading...</div>}>
-            <ApiKeyWrapper onApiKeySet={onApiKeySet}>{children}</ApiKeyWrapper>
+            <ApiKeyWrapper>{children}</ApiKeyWrapper>
         </Suspense>
     );
 }
