@@ -5,9 +5,11 @@ import Visualization from "../components/Visualization";
 import AnimationEditor from "../components/AnimationEditor";
 import PresetsManager from "../components/PresetsManager";
 import Image from "next/image";
+import AccessDenied from "./AccessDenied";
 
 export default function Home() {
     const [currentView, setCurrentView] = useState("viz");
+    const [authStatus, setAuthStatus] = useState("pending"); // pending, authenticated, unauthorized
     const [config, setConfig] = useState(null);
     const [rawConfigString, setRawConfigString] = useState(""); // Still needed for save functionality, even if tab is gone
     const [animations, setAnimations] = useState([]);
@@ -32,24 +34,49 @@ export default function Home() {
     };
 
     // Initial Fetch
+    const getApiKey = () => {
+        if (typeof window !== "undefined") {
+            return localStorage.getItem("apiKey");
+        }
+        return null;
+    };
+
     const fetchData = async () => {
+        setLoading(true);
+        const apiKey = getApiKey();
+        const headers = apiKey ? { "X-API-Key": apiKey } : {};
         try {
             const [configRes, animRes, presetsRes] = await Promise.all([
-                fetch("/api/config/"),
-                fetch("/api/animations/"),
-                fetch("/api/presets/"),
+                fetch("/api/config/", { headers }),
+                fetch("/api/animations/", { headers }),
+                fetch("/api/presets/", { headers }),
             ]);
+
+            if (
+                configRes.status === 403 ||
+                animRes.status === 403 ||
+                presetsRes.status === 403
+            ) {
+                setAuthStatus("unauthorized");
+                return;
+            }
+
+            if (!configRes.ok) throw new Error("Failed to fetch config");
+            if (!animRes.ok) throw new Error("Failed to fetch animations");
+            if (!presetsRes.ok) throw new Error("Failed to fetch presets");
+
             const configData = await configRes.json();
             const animData = await animRes.json();
             const presetsData = await presetsRes.json();
-
             setConfig(configData);
             setRawConfigString(JSON.stringify(configData, null, 2));
             setAnimations(animData);
             setPresets(presetsData);
-            setLoading(false);
+            setAuthStatus("authenticated");
         } catch (e) {
-            console.error("Failed to load data", e);
+            showSnackbar("Error fetching data: " + e.message, "error");
+            setAuthStatus("unauthorized");
+        } finally {
             setLoading(false);
         }
     };
@@ -91,16 +118,22 @@ export default function Home() {
     const saveConfig = async () => {
         setSaving(true);
         try {
+            const apiKey = getApiKey();
             // Save combined config (animations, strips, and projection.floor)
             const configRes = await fetch("/api/config/", {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(apiKey && { "X-API-Key": apiKey }),
+                },
                 body: JSON.stringify(config),
             });
             if (!configRes.ok) throw new Error("Failed to save config");
 
             // Reload config to confirm
-            const newConfigRes = await fetch("/api/config/");
+            const newConfigRes = await fetch("/api/config/", {
+                headers: { ...(apiKey && { "X-API-Key": apiKey }) },
+            });
             const newConfig = await newConfigRes.json();
 
             setConfig(newConfig);
@@ -129,12 +162,16 @@ export default function Home() {
         }
     };
 
-    if (loading) {
+    if (authStatus === "pending" || loading) {
         return (
-            <div className="h-screen flex items-center justify-center bg-gray-900 text-teal-400">
-                Loading...
+            <div className="flex justify-center items-center h-screen bg-gray-900">
+                <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-blue-500"></div>
             </div>
         );
+    }
+
+    if (authStatus === "unauthorized") {
+        return <AccessDenied />;
     }
 
     if (!config) {

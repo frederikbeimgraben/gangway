@@ -212,7 +212,7 @@ export default function PresetsManager({
             </h2>
 
             {/* Save New Preset */}
-            <div className="flex gap-2 mb-6">
+            <div className="flex flex-wrap gap-2 mb-6">
                 <input
                     type="text"
                     value={newPresetName}

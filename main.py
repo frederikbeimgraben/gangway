@@ -4,6 +4,7 @@ import asyncio
 from pathlib import Path
 
 import uvicorn
+from dotenv import load_dotenv
 
 from modules import config
 from modules.api import app
@@ -14,6 +15,7 @@ from modules.xovis.server import XOVISServer
 
 
 async def main():
+    load_dotenv()
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=Path, help="Path to config.yaml")
     args = parser.parse_args()

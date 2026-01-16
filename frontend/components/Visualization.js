@@ -2,6 +2,14 @@
 
 import { useEffect, useRef, useState } from "react";
 
+// Helper to get API Key from localStorage
+const getApiKey = () => {
+    if (typeof window !== "undefined") {
+        return localStorage.getItem("apiKey");
+    }
+    return null;
+};
+
 export default function Visualization({ config }) {
     const canvasRef = useRef(null);
     const [showImage, setShowImage] = useState(true);
@@ -42,36 +50,62 @@ export default function Visualization({ config }) {
         return () => observer.disconnect();
     }, [floorWidth, floorHeight]);
 
-    // Image Refresh Loop with Double Buffering
+    // Image Refresh Loop with Authentication
     useEffect(() => {
-        if (!showImage) return;
+        if (!showImage) {
+            setImageSrc(""); // Clear image if toggled off
+            return;
+        }
 
         let isMounted = true;
         let timeoutId;
+        let currentObjectUrl = null;
 
-        const loadNextImage = () => {
+        const loadNextImage = async () => {
+            if (!isMounted) return;
+
+            const apiKey = getApiKey();
+            if (!apiKey) {
+                console.error("API Key not found for visualization.");
+                timeoutId = setTimeout(loadNextImage, 1000); // Retry
+                return;
+            }
+
             const endpoint =
                 viewMode === "mapped"
                     ? "/api/visualization/live_mapped"
                     : "/api/visualization/live";
-            const nextSrc = `${endpoint}?t=${Date.now()}`;
-            const img = new Image();
 
-            img.onload = () => {
+            try {
+                const response = await fetch(endpoint, {
+                    headers: { "X-API-Key": apiKey },
+                });
+
+                if (!isMounted) return;
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const nextObjectUrl = URL.createObjectURL(blob);
+
+                    if (currentObjectUrl) {
+                        URL.revokeObjectURL(currentObjectUrl);
+                    }
+                    currentObjectUrl = nextObjectUrl;
+                    setImageSrc(nextObjectUrl);
+                } else {
+                    console.error(
+                        "Failed to fetch live visualization image:",
+                        response.status,
+                    );
+                }
+            } catch (error) {
+                if (isMounted)
+                    console.error("Error fetching live image:", error);
+            } finally {
                 if (isMounted) {
-                    setImageSrc(nextSrc);
                     timeoutId = setTimeout(loadNextImage, 200);
                 }
-            };
-
-            img.onerror = () => {
-                if (isMounted) {
-                    // On error, keep existing image and try again
-                    timeoutId = setTimeout(loadNextImage, 200);
-                }
-            };
-
-            img.src = nextSrc;
+            }
         };
 
         loadNextImage();
@@ -79,6 +113,9 @@ export default function Visualization({ config }) {
         return () => {
             isMounted = false;
             clearTimeout(timeoutId);
+            if (currentObjectUrl) {
+                URL.revokeObjectURL(currentObjectUrl);
+            }
         };
     }, [showImage, viewMode]);
 
@@ -92,23 +129,34 @@ export default function Visualization({ config }) {
         let isRunning = true;
 
         const render = async () => {
-            // Fetch Data
+            const apiKey = getApiKey();
+            const headers = apiKey ? { "X-API-Key": apiKey } : {};
+
             try {
                 const [ledsRes, objectsRes, fpsRes] = await Promise.all([
-                    fetch("/api/data/leds"),
-                    fetch("/api/data/objects"),
-                    fetch("/api/data/fps"),
+                    fetch("/api/data/leds", { headers }),
+                    fetch("/api/data/objects", { headers }),
+                    fetch("/api/data/fps", { headers }),
                 ]);
 
                 if (!isRunning) return;
+
+                if (
+                    [ledsRes, objectsRes, fpsRes].some(
+                        (res) => res.status === 403,
+                    )
+                ) {
+                    console.error(
+                        "Authentication failed for visualization data.",
+                    );
+                    return; // Stop rendering
+                }
 
                 const leds = showColors ? await ledsRes.json() : {};
                 const objects = showObjects ? await objectsRes.json() : [];
                 const fpsData = await fpsRes.json();
 
                 setStats(fpsData);
-
-                // Clear
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
                 if (viewMode === "raw") {
@@ -118,7 +166,6 @@ export default function Visualization({ config }) {
                     return;
                 }
 
-                // Draw Strips
                 ctx.lineWidth = 4;
                 config.strips.forEach((strip) => {
                     ctx.strokeStyle = "#333";
@@ -127,7 +174,6 @@ export default function Visualization({ config }) {
                     ctx.lineTo(strip.end[0], strip.end[1]);
                     ctx.stroke();
 
-                    // Calculate LED positions
                     const dx =
                         (strip.end[0] - strip.start[0]) / (strip.len - 1);
                     const dy =
@@ -137,12 +183,9 @@ export default function Visualization({ config }) {
                         const x = strip.start[0] + dx * i;
                         const y = strip.start[1] + dy * i;
                         const ledIndex = strip.index + i;
-
-                        // Draw LED
                         const color = leds[ledIndex];
+
                         if (color) {
-                            // Simple RGB approximation from RGBCCT
-                            // CCT is ignored for visualization simplicity, or added as white overlay
                             const r = Math.min(
                                 255,
                                 color.r + color.cw + color.ww,
@@ -166,7 +209,6 @@ export default function Visualization({ config }) {
                     }
                 });
 
-                // Draw Objects
                 ctx.fillStyle = "rgba(255, 0, 0, 0.7)";
                 objects.forEach((obj) => {
                     ctx.beginPath();
