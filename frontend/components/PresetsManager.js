@@ -82,6 +82,13 @@ export default function PresetsManager({
     const [editingPresetName, setEditingPresetName] = useState(null);
     const [editingConfig, setEditingConfig] = useState(null);
 
+    const getApiKey = () => {
+        if (typeof window !== "undefined") {
+            return localStorage.getItem("apiKey");
+        }
+        return null;
+    };
+
     const handleSavePreset = async () => {
         const name = newPresetName.trim();
         if (!name) return;
@@ -93,9 +100,12 @@ export default function PresetsManager({
 
         setLoading(true);
         try {
+            const apiKey = getApiKey();
+            const headers = apiKey ? { "X-API-Key": apiKey } : {};
             // Save current active config as preset
             const res = await fetch(`/api/presets/${name}`, {
                 method: "POST",
+                headers,
             });
             if (res.ok) {
                 showSnackbar?.("Preset saved", "success");
@@ -116,7 +126,9 @@ export default function PresetsManager({
     const handleEditPreset = async (name) => {
         setLoading(true);
         try {
-            const res = await fetch(`/api/presets/${name}`);
+            const apiKey = getApiKey();
+            const headers = apiKey ? { "X-API-Key": apiKey } : {};
+            const res = await fetch(`/api/presets/${name}`, { headers });
             if (res.ok) {
                 const data = await res.json();
                 setEditingPresetName(name);
@@ -136,9 +148,13 @@ export default function PresetsManager({
         if (!editingPresetName || !editingConfig) return;
         setLoading(true);
         try {
+            const apiKey = getApiKey();
+            const headers = apiKey
+                ? { "X-API-Key": apiKey, "Content-Type": "application/json" }
+                : {};
             const res = await fetch(`/api/presets/${editingPresetName}`, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers,
                 body: JSON.stringify(editingConfig),
             });
             if (res.ok) {
@@ -164,8 +180,13 @@ export default function PresetsManager({
     const handleLoadPreset = async (name) => {
         setLoading(true);
         try {
+            const apiKey = getApiKey();
+            const headers = apiKey
+                ? { "X-API-Key": apiKey, "Content-Type": "application/json" }
+                : {};
             const res = await fetch(`/api/presets/${name}/load`, {
                 method: "POST",
+                headers,
             });
             if (res.ok) {
                 showSnackbar?.(`Preset '${name}' loaded`, "success");
@@ -185,8 +206,13 @@ export default function PresetsManager({
     const handleDeletePreset = async (name) => {
         if (!confirm(`Delete preset "${name}"?`)) return;
         try {
+            const apiKey = getApiKey();
+            const headers = apiKey
+                ? { "X-API-Key": apiKey, "Content-Type": "application/json" }
+                : {};
             const res = await fetch(`/api/presets/${name}`, {
                 method: "DELETE",
+                headers,
             });
             if (res.ok) {
                 showSnackbar?.("Preset deleted", "success");
