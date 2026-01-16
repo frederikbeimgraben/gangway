@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import yaml
 from fastapi import APIRouter, HTTPException
@@ -13,6 +13,27 @@ router = APIRouter()
 # Ensure presets directory exists
 PRESETS_DIR = CONFIG.path.parent / "presets"
 PRESETS_DIR.mkdir(exist_ok=True)
+
+
+def find_preset_usage(data: Any, target_name: str) -> bool:
+    if isinstance(data, dict):
+        if "preset" in data:
+            val = data["preset"]
+            if val == target_name:
+                return True
+            if isinstance(val, dict) and val.get("name") == target_name:
+                return True
+
+        for value in data.values():
+            if find_preset_usage(value, target_name):
+                return True
+
+    elif isinstance(data, list):
+        for item in data:
+            if find_preset_usage(item, target_name):
+                return True
+
+    return False
 
 
 class PresetModel(BaseModel):
@@ -107,6 +128,31 @@ def load_preset(name: str):
 @router.delete("/{name}")
 def delete_preset(name: str):
     """Delete a preset."""
+    # Check if used in active configuration
+    if find_preset_usage(CONFIG.data.get("animation"), name):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Preset '{name}' is currently in use in the active configuration.",
+        )
+
+    # Check if used in other presets
+    for p in PRESETS_DIR.glob("*.yaml"):
+        if p.stem == name:
+            continue
+
+        try:
+            with open(p, "r") as f:
+                content = yaml.safe_load(f)
+            if find_preset_usage(content, name):
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Preset '{name}' is used by another preset '{p.stem}'.",
+                )
+        except HTTPException:
+            raise
+        except Exception:
+            continue
+
     preset_path = PRESETS_DIR / f"{name}.yaml"
     if preset_path.exists():
         try:

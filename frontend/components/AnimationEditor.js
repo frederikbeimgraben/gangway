@@ -11,6 +11,7 @@ export default function AnimationEditor({
     onChange, // Callback when the configuration changes
     availableAnimations, // The list of animations to show in the dropdown
     allAnimations, // The complete list of all animations (for nested editors)
+    presets = [],
     isRoot = false, // Flag to indicate if this is a top-level editor
 }) {
     const [selectedAnimName, setSelectedAnimName] = useState("");
@@ -109,11 +110,13 @@ export default function AnimationEditor({
                             </label>
                             <ParamInput
                                 param={param}
+                                animName={selectedAnimName}
                                 value={params[param.name]}
                                 onChange={(val) =>
                                     handleParamChange(param.name, val)
                                 }
                                 allAnimations={allAnimations}
+                                presets={presets}
                             />
                         </div>
                     ))}
@@ -227,7 +230,14 @@ const ColorInputs = ({ value: colorValue, onChange: onColorChange }) => {
     );
 };
 
-function ParamInput({ param, value, onChange, allAnimations }) {
+function ParamInput({
+    param,
+    value,
+    onChange,
+    allAnimations,
+    presets,
+    animName,
+}) {
     // --- Type Parsing Helpers ---
     // These functions inspect the detailed type object from the backend API.
     const findTypeByName = (typeObj, name) => {
@@ -252,6 +262,9 @@ function ParamInput({ param, value, onChange, allAnimations }) {
         typeObj && (typeObj.name === "int" || typeObj.name === "float");
     const isBool = (typeObj) => typeObj && typeObj.name === "bool";
     const isLiteral = (typeObj) => typeObj && typeObj.name === "Literal";
+    const isPresetName = () =>
+        (param.type && param.type.name === "Preset") ||
+        (animName === "preset" && param.name === "name");
 
     // --- Determine Child Animation Availability ---
     const getChildAnimations = () => {
@@ -458,10 +471,31 @@ function ParamInput({ param, value, onChange, allAnimations }) {
                             onChange={onChange}
                             availableAnimations={childAnims}
                             allAnimations={allAnimations}
+                            presets={presets}
                         />
                     </div>
                 )}
             </div>
+        );
+    }
+
+    // Case: Preset Name Selection
+    if (isPresetName()) {
+        return (
+            <select
+                value={value ?? ""}
+                onChange={(e) => onChange(e.target.value)}
+                className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none w-[calc(100%-2.5rem)]"
+            >
+                <option value="" disabled>
+                    Select a preset...
+                </option>
+                {presets.map((p) => (
+                    <option key={p} value={p}>
+                        {p}
+                    </option>
+                ))}
+            </select>
         );
     }
 

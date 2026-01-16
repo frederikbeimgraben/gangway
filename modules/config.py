@@ -12,7 +12,7 @@ import yaml
 from rpi_ws2805 import RGBCCT
 
 from .animations import idle, meta, responsive
-from .helpers import interpolate_points
+from .helpers import interpolate_points, parse_animation
 from .types import LED, Animation, Point, Rectangle, Strip
 
 
@@ -98,7 +98,9 @@ class GANGWAYConfig:
                 for i in range(strip.len)
             ]
 
-            self.ANIMATION = self._parse_animation(config.get("animation", {}))
+            self.ANIMATION = parse_animation(
+                config.get("animation", {}), ANIMATION_FUNCTIONS
+            )
 
             mqtt_config = config.get("mqtt", {})
             self.MQTT_HOST = mqtt_config.get("host", "localhost")
@@ -120,55 +122,6 @@ class GANGWAYConfig:
             # reconstruct the dictionary from the class attributes.
             with open(self.path, "w") as f:
                 yaml.dump(config, f)
-
-    def _parse_animation(self, anim_config: Any) -> Animation | RGBCCT:
-        if not isinstance(anim_config, dict):
-            return anim_config
-
-        if "r" in anim_config and "g" in anim_config and "b" in anim_config:
-            return RGBCCT(**anim_config)
-
-        anim_name = list(anim_config.keys())[0]
-        anim_args = list(anim_config.values())[0]
-
-        anim_func = ANIMATION_FUNCTIONS.get(anim_name)
-        if not anim_func:
-            raise ValueError(f"Unknown animation function: {anim_name}")
-
-        sig = inspect.signature(anim_func)
-
-        # Check for unexpected arguments
-        valid_param_names = {p.name for p in sig.parameters.values()}
-        for arg_name in anim_args.keys():
-            if arg_name not in valid_param_names:
-                raise ValueError(
-                    f"Unknown parameter '{arg_name}' for animation '{anim_name}'"
-                )
-
-        parsed_args = {}
-        var_args = []
-
-        for param in sig.parameters.values():
-            if param.kind == inspect.Parameter.VAR_POSITIONAL:
-                if param.name in anim_args:
-                    for arg in anim_args[param.name]:
-                        var_args.append(self._parse_animation(arg))
-                continue
-
-            if param.name in anim_args:
-                arg_value = anim_args[param.name]
-                if isinstance(arg_value, dict):
-                    parsed_args[param.name] = self._parse_animation(arg_value)
-                elif isinstance(arg_value, list):
-                    parsed_args[param.name] = [
-                        self._parse_animation(v) for v in arg_value
-                    ]
-                else:
-                    parsed_args[param.name] = arg_value
-            elif param.default is not inspect.Parameter.empty:
-                parsed_args[param.name] = param.default
-
-        return anim_func(*var_args, **parsed_args)
 
 
 # Global config instance

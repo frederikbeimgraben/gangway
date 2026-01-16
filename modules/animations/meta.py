@@ -4,12 +4,13 @@ Meta-Animation Definitions
 """
 
 import datetime
-from time import sleep
-from typing import Dict, Iterable, Literal, Tuple
+from pathlib import Path
+from typing import Dict, Iterable, Literal, Optional, Set, Tuple
 
+import yaml
 from rpi_ws2805 import RGBCCT
 
-from ..helpers import interpolate_rgbcct
+from ..helpers import interpolate_rgbcct, parse_animation
 from ..types import LED, Animation, Point, SceneContext
 
 
@@ -382,3 +383,32 @@ def proximity_speed(
         )
 
     return _animation
+
+
+def preset(name: str, visited_presets: Optional[Set[str]] = None) -> Animation | RGBCCT:
+    from ..config import ANIMATION_FUNCTIONS
+
+    if visited_presets is None:
+        visited_presets = set()
+
+    if name in visited_presets:
+        return RGBCCT()
+
+    new_visited = visited_presets.copy()
+    new_visited.add(name)
+
+    presets_dir = Path(__file__).parent.parent.parent / "presets"
+    preset_path = presets_dir / f"{name}.yaml"
+
+    if not preset_path.exists():
+        return RGBCCT()
+
+    with open(preset_path, "r") as f:
+        anim_config = yaml.safe_load(f)
+
+    if anim_config is None:
+        return RGBCCT()
+
+    return parse_animation(
+        anim_config, ANIMATION_FUNCTIONS, visited_presets=new_visited
+    )

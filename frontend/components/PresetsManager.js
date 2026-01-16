@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 // Simple Icons to avoid external dependencies
 const PlayIcon = ({ className }) => (
@@ -52,39 +52,34 @@ const PlusIcon = ({ className }) => (
     </svg>
 );
 
-export default function PresetsManager({ onPresetLoaded, showSnackbar }) {
-    const [presets, setPresets] = useState([]);
+export default function PresetsManager({
+    presets = [],
+    onPresetLoaded,
+    onPresetsChanged,
+    showSnackbar,
+}) {
     const [newPresetName, setNewPresetName] = useState("");
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        fetchPresets();
-    }, []);
-
-    const fetchPresets = async () => {
-        try {
-            const res = await fetch("/api/presets/");
-            if (res.ok) {
-                const data = await res.json();
-                setPresets(data);
-            }
-        } catch (error) {
-            console.error("Failed to fetch presets:", error);
-        }
-    };
-
     const handleSavePreset = async () => {
-        if (!newPresetName.trim()) return;
+        const name = newPresetName.trim();
+        if (!name) return;
+
+        if (presets.includes(name)) {
+            showSnackbar?.("Preset name already exists", "error");
+            return;
+        }
+
         setLoading(true);
         try {
             // Save current active config as preset
-            const res = await fetch(`/api/presets/${newPresetName}`, {
+            const res = await fetch(`/api/presets/${name}`, {
                 method: "POST",
             });
             if (res.ok) {
                 showSnackbar?.("Preset saved", "success");
                 setNewPresetName("");
-                fetchPresets();
+                onPresetsChanged?.();
             } else {
                 const err = await res.json();
                 showSnackbar?.(`Failed to save: ${err.detail}`, "error");
@@ -126,9 +121,13 @@ export default function PresetsManager({ onPresetLoaded, showSnackbar }) {
             });
             if (res.ok) {
                 showSnackbar?.("Preset deleted", "success");
-                fetchPresets();
+                onPresetsChanged?.();
             } else {
-                showSnackbar?.("Failed to delete preset", "error");
+                const err = await res.json();
+                showSnackbar?.(
+                    `Failed to delete preset: ${err.detail}`,
+                    "error",
+                );
             }
         } catch (error) {
             console.error(error);

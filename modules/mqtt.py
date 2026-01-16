@@ -71,8 +71,8 @@ class MQTTHandler:
         device_info = {
             "identifiers": ["gangway_led_controller"],
             "name": "Gangway LED Controller",
-            "manufacturer": "FSI",
-            "model": "Raspberry Pi WS2805",
+            "manufacturer": "STUPA MAKERS",
+            "model": "G.A.N.G.W.A.Y",
         }
 
         # Select Entity for Presets
@@ -88,14 +88,16 @@ class MQTTHandler:
 
         # Node ID in discovery topic should be unique per device
         node_id = CONFIG.MQTT_TOPIC_PREFIX
-        await self.client.publish(
-            f"homeassistant/select/{node_id}/preset/config",
-            json.dumps(config_payload),
-            retain=True,
-        )
+        if self.client is not None:
+            await self.client.publish(
+                f"homeassistant/select/{node_id}/preset/config",
+                json.dumps(config_payload),
+                retain=True,
+            )
 
     async def _subscribe_command(self):
-        await self.client.subscribe(f"{CONFIG.MQTT_TOPIC_PREFIX}/preset/set")
+        if self.client is not None:
+            await self.client.subscribe(f"{CONFIG.MQTT_TOPIC_PREFIX}/preset/set")
 
     async def _handle_message(self, message):
         topic = message.topic
@@ -103,7 +105,7 @@ class MQTTHandler:
 
         if topic.matches(f"{CONFIG.MQTT_TOPIC_PREFIX}/preset/set"):
             logger.info(f"Received preset switch request: {payload}")
-            if await self._load_preset(payload):
+            if await self._load_preset(payload) and self.client is not None:
                 await self.client.publish(
                     f"{CONFIG.MQTT_TOPIC_PREFIX}/preset/state",
                     payload,

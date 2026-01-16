@@ -241,6 +241,12 @@ class PersistParams(BaseModel):
     duration: float = Field(default=2.0, ge=0.0)
 
 
+class PresetParams(BaseModel):
+    """Parameters for the preset animation."""
+
+    name: str = Field(..., description="Name of the preset to load.")
+
+
 # --- Animation Wrapper Models (to enforce {'name': params} structure) ---
 
 
@@ -523,6 +529,19 @@ class PersistAnimation(BaseModel):
         extra = "forbid"  # Disallow other keys
 
 
+class PresetAnimation(BaseModel):
+    """Wrapper for the preset animation."""
+
+    preset: Union[PresetParams, str] = Field(
+        ...,
+        title="Preset",
+        description="Loads an existing preset.",
+    )
+
+    class Config:
+        extra = "forbid"  # Disallow other keys
+
+
 # --- Union of All Animation Models ---
 AnimationModel = Union[
     AlternateAnimation,
@@ -548,6 +567,7 @@ AnimationModel = Union[
     ProximityAnimation,
     ProximitySpeedAnimation,
     PersistAnimation,
+    PresetAnimation,
 ]
 
 # --- Rebuild Models to Resolve Forward References ---
@@ -574,3 +594,4 @@ ProximityParams.model_rebuild()
 ProximitySpeedParams.model_rebuild()
 SparkleParams.model_rebuild()
 PersistParams.model_rebuild()
+PresetParams.model_rebuild()

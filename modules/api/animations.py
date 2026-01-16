@@ -13,7 +13,7 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from pydantic_core import PydanticUndefined
 
-from .models import AnimationModel, RGBCCTModel
+from .models import AnimationModel, PresetParams, RGBCCTModel
 
 router = APIRouter()
 
@@ -38,6 +38,8 @@ def _get_type_info(annotation: Any) -> Dict[str, Any]:
         return {"name": "str"}
     if annotation is RGBCCTModel:
         return {"name": "RGBCCT"}
+    if annotation is PresetParams:
+        return {"name": "Preset"}
 
     origin = get_origin(annotation)
     args = get_args(annotation)
@@ -89,7 +91,15 @@ def _parse_animation_union(union_model: Any) -> List[Dict[str, Any]]:
             description = wrapper_model.__doc__
 
         params_list = []
-        if issubclass(params_model, BaseModel):
+
+        # Handle Union types (e.g. Union[PresetParams, str]) by picking the BaseModel
+        if get_origin(params_model):
+            for arg in get_args(params_model):
+                if inspect.isclass(arg) and issubclass(arg, BaseModel):
+                    params_model = arg
+                    break
+
+        if inspect.isclass(params_model) and issubclass(params_model, BaseModel):
             for param_name, param_field in params_model.model_fields.items():
                 default_val = param_field.get_default()
 

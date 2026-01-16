@@ -11,6 +11,7 @@ export default function Home() {
     const [config, setConfig] = useState(null);
     const [rawConfigString, setRawConfigString] = useState(""); // Still needed for save functionality, even if tab is gone
     const [animations, setAnimations] = useState([]);
+    const [presets, setPresets] = useState([]);
     // layoutConfig state removed — using `config` as the single source of truth
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -33,16 +34,19 @@ export default function Home() {
     // Initial Fetch
     const fetchData = async () => {
         try {
-            const [configRes, animRes] = await Promise.all([
+            const [configRes, animRes, presetsRes] = await Promise.all([
                 fetch("/api/config/"),
                 fetch("/api/animations/"),
+                fetch("/api/presets/"),
             ]);
             const configData = await configRes.json();
             const animData = await animRes.json();
+            const presetsData = await presetsRes.json();
 
             setConfig(configData);
             setRawConfigString(JSON.stringify(configData, null, 2));
             setAnimations(animData);
+            setPresets(presetsData);
             setLoading(false);
         } catch (e) {
             console.error("Failed to load data", e);
@@ -223,11 +227,14 @@ export default function Home() {
                                         onChange={updateAnimationConfig}
                                         allAnimations={animations}
                                         availableAnimations={animations}
+                                        presets={presets}
                                         isRoot={true}
                                     />
                                 </div>
 
                                 <PresetsManager
+                                    presets={presets}
+                                    onPresetsChanged={fetchData}
                                     onPresetLoaded={fetchData}
                                     showSnackbar={showSnackbar}
                                 />
