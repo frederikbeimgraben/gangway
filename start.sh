@@ -1,10 +1,17 @@
 #!/usr/bin/env bash
 
-if [ "$EUID" -ne 0 ]
-  then echo "Please run as root"
-  exit
-fi
+# Get the script's absolute directory to avoid path issues
+SCRIPT_DIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
 
-sh -c "cd $(dirname "$0")/frontend && killall next-server || npm run start && npm run start" 2>> "$(dirname "$0")/output.log" &
+# Redirect all output from this script to the log file for better debugging
+exec >> "$SCRIPT_DIR/output.log" 2>&1
 
-"$(dirname "$0")/venv/bin/python3" "$(dirname "$0")/main.py" 2>> "$(dirname "$0")/output.log"
+echo "--- Starting Gangway Service ---"
+
+# Start the frontend in the background from the correct directory
+echo "Starting frontend..."
+(cd "$SCRIPT_DIR/frontend" && npm run start) &
+
+# Start the backend in the foreground
+echo "Starting backend..."
+"$SCRIPT_DIR/venv/bin/python3" "$SCRIPT_DIR/main.py"
