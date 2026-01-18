@@ -6,12 +6,12 @@ from pathlib import Path
 import uvicorn
 from dotenv import load_dotenv
 
-from modules import config
-from modules.api import app
-from modules.led_controller import LEDController
-from modules.mqtt import MQTTHandler
-from modules.state import STATE
-from modules.xovis.server import XOVISServer
+from gangway import config
+from gangway.api import app
+from gangway.led_controller import LEDController
+from gangway.mqtt import MQTTHandler
+from gangway.state import STATE
+from gangway.xovis.server import XOVISServer
 
 
 async def main():
