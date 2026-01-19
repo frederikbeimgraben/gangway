@@ -288,20 +288,18 @@ export default function PresetsManager({
     };
 
     return (
-        <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-6">
-            <h2 className="text-xl font-semibold mb-6 text-teal-300 flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-teal-300"></span>
-                Presets
-            </h2>
-
-            {/* Save New Preset */}
-            <div className="flex flex-wrap gap-2 mb-6">
+        <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl p-8 border border-white/5 shadow-xl">
+            <h3 className="text-xs uppercase tracking-widest font-black mb-8 text-teal-500 flex items-center gap-3">
+                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.8)]"></span>
+                Archive
+            </h3>
+            <div className="flex gap-3 mb-8">
                 <input
                     type="text"
                     value={newPresetName}
                     onChange={(e) => setNewPresetName(e.target.value)}
                     placeholder="New preset name..."
-                    className="flex-1 px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-white placeholder-gray-400"
+                    className="flex-1 px-4 py-2.5 bg-black/30 border border-white/5 rounded-xl focus:outline-none focus:border-teal-500/50 text-white placeholder-gray-600 transition-all hover:bg-black/50 shadow-inner"
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
                             e.preventDefault();
@@ -313,34 +311,34 @@ export default function PresetsManager({
                     type="button"
                     onClick={handleSavePreset}
                     disabled={loading || !newPresetName.trim()}
-                    className="bg-teal-600 text-white px-4 py-2 rounded-md hover:bg-teal-500 disabled:opacity-50 flex items-center gap-2 transition-colors"
+                    className="bg-teal-600 text-white px-6 py-2.5 rounded-xl hover:bg-teal-500 disabled:opacity-50 flex items-center gap-2 transition-all transform active:scale-95 shadow-lg shadow-teal-900/20 font-bold text-sm"
                 >
                     <PlusIcon className="w-5 h-5" />
-                    Save Current
+                    Save
                 </button>
             </div>
 
             {/* Preset List */}
-            <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+            <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                 {presets.length === 0 ? (
-                    <p className="text-gray-400 text-center py-4">
-                        No presets saved yet.
+                    <p className="text-gray-600 text-center py-8 text-sm italic">
+                        No presets archived yet.
                     </p>
                 ) : (
                     presets.map((name) => (
                         <div
                             key={name}
-                            className="flex items-center justify-between p-3 bg-gray-700 rounded-md border border-gray-600 hover:bg-gray-600 transition-colors"
+                            className="flex items-center justify-between p-4 bg-white/[0.02] border border-white/5 rounded-xl hover:bg-white/[0.05] transition-all group/preset shadow-sm"
                         >
-                            <span className="font-medium text-white truncate mr-4">
+                            <span className="font-bold text-gray-200 truncate mr-4 text-sm tracking-tight">
                                 {name}
                             </span>
-                            <div className="flex gap-2 flex-shrink-0">
+                            <div className="flex gap-1 flex-shrink-0">
                                 <button
                                     type="button"
                                     onClick={() => handleLoadPreset(name)}
                                     disabled={loading}
-                                    className="p-2 text-teal-400 hover:bg-gray-500 rounded-md transition-colors"
+                                    className="p-2 text-teal-500 hover:bg-teal-500/10 rounded-lg transition-all"
                                     title="Load Preset"
                                 >
                                     <PlayIcon className="w-5 h-5" />
@@ -349,7 +347,7 @@ export default function PresetsManager({
                                     type="button"
                                     onClick={() => handleRenameClick(name)}
                                     disabled={loading}
-                                    className="p-2 text-yellow-400 hover:bg-gray-500 rounded-md transition-colors"
+                                    className="p-2 text-yellow-500 hover:bg-yellow-500/10 rounded-lg transition-all"
                                     title="Rename Preset"
                                 >
                                     <RenameIcon className="w-5 h-5" />
@@ -358,7 +356,7 @@ export default function PresetsManager({
                                     type="button"
                                     onClick={() => handleEditPreset(name)}
                                     disabled={loading}
-                                    className="p-2 text-blue-400 hover:bg-gray-500 rounded-md transition-colors"
+                                    className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all"
                                     title="Edit Preset Config"
                                 >
                                     <EditIcon className="w-5 h-5" />
@@ -367,7 +365,7 @@ export default function PresetsManager({
                                     type="button"
                                     onClick={() => handleDeletePreset(name)}
                                     disabled={loading}
-                                    className="p-2 text-red-400 hover:bg-gray-500 rounded-md transition-colors"
+                                    className="p-2 text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
                                     title="Delete Preset"
                                 >
                                     <TrashIcon className="w-5 h-5" />
@@ -380,13 +378,15 @@ export default function PresetsManager({
 
             {/* Edit Modal */}
             {editingPresetName && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-                    <div className="bg-gray-800 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] flex flex-col border border-gray-700">
-                        <div className="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-900 rounded-t-lg">
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                <EditIcon className="w-5 h-5 text-blue-400" />
-                                Editing:{" "}
-                                <span className="text-teal-400">
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-md">
+                    <div className="bg-gray-950 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col border border-white/5 overflow-hidden animate-in fade-in zoom-in duration-300">
+                        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-gray-900/50 backdrop-blur-xl">
+                            <h3 className="text-lg font-black text-white flex items-center gap-3">
+                                <EditIcon className="w-5 h-5 text-blue-500" />
+                                <span className="opacity-50 uppercase tracking-widest text-[10px]">
+                                    Edit
+                                </span>
+                                <span className="text-teal-500">
                                     {editingPresetName}
                                 </span>
                             </h3>
@@ -395,12 +395,12 @@ export default function PresetsManager({
                                     setEditingPresetName(null);
                                     setEditingConfig(null);
                                 }}
-                                className="text-gray-400 hover:text-white transition-colors"
+                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gray-400 hover:text-white transition-colors"
                             >
                                 ✕
                             </button>
                         </div>
-                        <div className="p-6 overflow-y-auto flex-1">
+                        <div className="p-8 overflow-y-auto flex-1 bg-gray-950/50">
                             <AnimationEditor
                                 config={editingConfig}
                                 onChange={(newConfig) =>
@@ -412,22 +412,22 @@ export default function PresetsManager({
                                 isRoot={true}
                             />
                         </div>
-                        <div className="p-4 border-t border-gray-700 flex justify-end gap-2 bg-gray-900 rounded-b-lg">
+                        <div className="p-6 border-t border-white/5 flex justify-end gap-3 bg-gray-900/50 backdrop-blur-xl">
                             <button
                                 onClick={() => {
                                     setEditingPresetName(null);
                                     setEditingConfig(null);
                                 }}
-                                className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
+                                className="px-6 py-2 bg-black/40 text-gray-400 rounded-xl hover:text-white transition-all font-bold text-xs"
                             >
                                 Cancel
                             </button>
                             <button
                                 onClick={handleSaveEditedPreset}
                                 disabled={loading}
-                                className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-500 disabled:opacity-50 transition-colors"
+                                className="px-8 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-500 disabled:opacity-50 transition-all shadow-lg shadow-teal-900/20 font-bold text-xs"
                             >
-                                {loading ? "Saving..." : "Save Changes"}
+                                {loading ? "Saving..." : "Apply Changes"}
                             </button>
                         </div>
                     </div>
@@ -436,22 +436,24 @@ export default function PresetsManager({
 
             {/* Rename Modal */}
             {renamingPresetName && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-                    <div className="bg-gray-800 rounded-lg shadow-xl w-full max-w-md border border-gray-700">
-                        <div className="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-900 rounded-t-lg">
-                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                                <RenameIcon className="w-5 h-5 text-yellow-400" />
-                                Rename Preset
+                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-md">
+                    <div className="bg-gray-950 rounded-2xl shadow-2xl w-full max-w-md border border-white/5 overflow-hidden animate-in fade-in zoom-in duration-300">
+                        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-gray-900/50 backdrop-blur-xl">
+                            <h3 className="text-lg font-black text-white flex items-center gap-3">
+                                <RenameIcon className="w-5 h-5 text-yellow-500" />
+                                <span className="uppercase tracking-widest text-[10px]">
+                                    Rename
+                                </span>
                             </h3>
                             <button
                                 onClick={() => setRenamingPresetName(null)}
-                                className="text-gray-400 hover:text-white transition-colors"
+                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gray-400 hover:text-white transition-colors"
                             >
                                 ✕
                             </button>
                         </div>
-                        <div className="p-6">
-                            <label className="block text-gray-400 text-sm mb-2">
+                        <div className="p-8">
+                            <label className="block text-gray-500 text-[10px] uppercase tracking-widest font-black mb-3 ml-1">
                                 New Name
                             </label>
                             <input
@@ -466,18 +468,18 @@ export default function PresetsManager({
                                         handlePerformRename();
                                     }
                                 }}
-                                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-white"
+                                className="w-full px-4 py-3 bg-black/30 border border-white/5 rounded-xl focus:outline-none focus:border-teal-500/50 text-white transition-all hover:bg-black/50 shadow-inner"
                                 autoFocus
                             />
-                            <p className="text-xs text-gray-500 mt-2">
+                            <p className="text-[10px] text-gray-600 mt-4 leading-relaxed italic">
                                 Allowed characters: letters, numbers, spaces,
                                 hyphens, underscores.
                             </p>
                         </div>
-                        <div className="p-4 border-t border-gray-700 flex justify-end gap-2 bg-gray-900 rounded-b-lg">
+                        <div className="p-6 border-t border-white/5 flex justify-end gap-3 bg-gray-900/50 backdrop-blur-xl">
                             <button
                                 onClick={() => setRenamingPresetName(null)}
-                                className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
+                                className="px-6 py-2 bg-black/40 text-gray-400 rounded-xl hover:text-white transition-all font-bold text-xs"
                             >
                                 Cancel
                             </button>
@@ -488,9 +490,9 @@ export default function PresetsManager({
                                     !newRenamedName.trim() ||
                                     newRenamedName === renamingPresetName
                                 }
-                                className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-500 disabled:opacity-50 transition-colors"
+                                className="px-8 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-500 disabled:opacity-50 transition-all shadow-lg shadow-teal-900/20 font-bold text-xs"
                             >
-                                {loading ? "Renaming..." : "Rename"}
+                                {loading ? "Updating..." : "Confirm"}
                             </button>
                         </div>
                     </div>
