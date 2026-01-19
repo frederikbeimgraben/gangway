@@ -4,7 +4,7 @@ Helper Functions
 """
 
 import inspect
-from typing import Any, Callable, Dict, Set, Union
+from typing import Any, Callable, Dict, Optional, Set, Union
 
 from rpi_ws2805 import RGBCCT
 
@@ -46,7 +46,7 @@ def to_hex(color: RGBCCT) -> str:
 def parse_animation(
     anim_config: Any,
     animation_functions: Dict[str, Callable],
-    visited_presets: Set[str] = None,
+    visited_presets: Optional[Set[str]] = None,
 ) -> Union[Callable, RGBCCT]:
     if not isinstance(anim_config, dict):
         return anim_config

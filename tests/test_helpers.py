@@ -155,6 +155,48 @@ class TestHelpers(unittest.TestCase):
         res = parse_animation(config, funcs)
         self.assertEqual(res, ["a", "b"])
 
+    def test_parse_animation_by_strip_structure(self):
+        def mock_by_strip(assignments=None, default=None):
+            return {"type": "by_strip", "assignments": assignments, "default": default}
+
+        def mock_strip_assignment(strip, animation):
+            return (strip, animation)
+
+        funcs = {
+            "by_strip": mock_by_strip,
+            "strip_assignment": mock_strip_assignment,
+        }
+
+        config = {
+            "by_strip": {
+                "assignments": [
+                    {
+                        "strip_assignment": {
+                            "strip": 1,
+                            "animation": {"r": 255, "g": 0, "b": 0, "ww": 0, "cw": 0},
+                        }
+                    },
+                    {
+                        "strip_assignment": {
+                            "strip": 2,
+                            "animation": {"r": 0, "g": 255, "b": 0, "ww": 0, "cw": 0},
+                        }
+                    },
+                ],
+                "default": {"r": 0, "g": 0, "b": 255, "ww": 0, "cw": 0},
+            }
+        }
+
+        res = parse_animation(config, funcs)
+
+        expected_assignments = [
+            (1, RGBCCT(255, 0, 0, 0, 0)),
+            (2, RGBCCT(0, 255, 0, 0, 0)),
+        ]
+        self.assertEqual(res["type"], "by_strip")
+        self.assertEqual(res["assignments"], expected_assignments)
+        self.assertEqual(res["default"], RGBCCT(0, 0, 255, 0, 0))
+
 
 if __name__ == "__main__":
     unittest.main()

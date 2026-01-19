@@ -241,6 +241,67 @@ class PersistParams(BaseModel):
     duration: float = Field(default=2.0, ge=0.0)
 
 
+class DayOfWeekParams(BaseModel):
+    """Parameters for the day_of_week animation."""
+
+    monday: Union["AnimationModel", RGBCCTModel] = Field(
+        default=RGBCCTModel(r=0, g=0, b=0, cw=0, ww=0)
+    )
+    tuesday: Union["AnimationModel", RGBCCTModel] = Field(
+        default=RGBCCTModel(r=0, g=0, b=0, cw=0, ww=0)
+    )
+    wednesday: Union["AnimationModel", RGBCCTModel] = Field(
+        default=RGBCCTModel(r=0, g=0, b=0, cw=0, ww=0)
+    )
+    thursday: Union["AnimationModel", RGBCCTModel] = Field(
+        default=RGBCCTModel(r=0, g=0, b=0, cw=0, ww=0)
+    )
+    friday: Union["AnimationModel", RGBCCTModel] = Field(
+        default=RGBCCTModel(r=0, g=0, b=0, cw=0, ww=0)
+    )
+    saturday: Union["AnimationModel", RGBCCTModel] = Field(
+        default=RGBCCTModel(r=0, g=0, b=0, cw=0, ww=0)
+    )
+    sunday: Union["AnimationModel", RGBCCTModel] = Field(
+        default=RGBCCTModel(r=0, g=0, b=0, cw=0, ww=0)
+    )
+
+
+class ExponentialAtParams(BaseModel):
+    """Parameters for the exponential_at animation."""
+
+    primary: Union["AnimationModel", RGBCCTModel] = Field(
+        default=RGBCCTModel(r=255, g=0, b=0, cw=0, ww=0)
+    )
+    secondary: Union["AnimationModel", RGBCCTModel] = Field(
+        default=RGBCCTModel(r=0, g=255, b=0, cw=0, ww=0)
+    )
+    x: float = 0.0
+    y: float = 0.0
+    radius: float = Field(default=150, ge=0)
+
+
+class StripAssignmentParams(BaseModel):
+    strip: int
+    animation: Union["AnimationModel", RGBCCTModel]
+
+
+class StripAssignmentWrapper(BaseModel):
+    strip_assignment: StripAssignmentParams = Field(..., title="Strip Assignment")
+
+    class Config:
+        extra = "forbid"
+
+
+class ByStripParams(BaseModel):
+    """Parameters for the by_strip animation."""
+
+    assignments: List[StripAssignmentWrapper] = Field(default_factory=list)
+    default: Union["AnimationModel", RGBCCTModel] = Field(
+        default=RGBCCTModel(r=0, g=0, b=0, cw=0, ww=0)
+    )
+
+
 class PresetParams(BaseModel):
     """Parameters for the preset animation."""
 
@@ -255,7 +316,7 @@ class AlternateAnimation(BaseModel):
 
     alternate: AlternateParams = Field(
         ...,
-        title="Alternate",
+        title="Alternate (Meta)",
         description="Alternates between multiple animations over time.",
     )
 
@@ -350,7 +411,9 @@ class DotAnimation(BaseModel):
     """Wrapper for the dot animation."""
 
     dot: DotParams = Field(
-        ..., title="Dot", description="Lights up area around detected objects."
+        ...,
+        title="Dot (Responsive)",
+        description="Lights up area around detected objects.",
     )
 
     class Config:
@@ -362,7 +425,7 @@ class ExponentialAnimation(BaseModel):
 
     exponential: ExponentialParams = Field(
         ...,
-        title="Exponential",
+        title="Exponential (Responsive)",
         description="Exponential falloff brightness based on object proximity.",
     )
 
@@ -384,7 +447,7 @@ class IdleAnimation(BaseModel):
 
     idle: IdleParams = Field(
         ...,
-        title="Idle Switch",
+        title="Idle Switch (Meta)",
         description="Switches between idle and active animations based on presence.",
     )
 
@@ -396,7 +459,7 @@ class BlendAnimation(BaseModel):
     """Wrapper for the blend animation."""
 
     blend: BlendParams = Field(
-        ..., title="Blend", description="Blends multiple animations together."
+        ..., title="Blend (Meta)", description="Blends multiple animations together."
     )
 
     class Config:
@@ -419,7 +482,7 @@ class ScheduleAnimation(BaseModel):
 
     schedule: ScheduleParams = Field(
         ...,
-        title="Schedule",
+        title="Schedule (Meta)",
         description="Runs different animations based on the time of day.",
     )
 
@@ -432,7 +495,7 @@ class PaintAnimation(BaseModel):
 
     paint: PaintParams = Field(
         ...,
-        title="Paint",
+        title="Paint (Responsive)",
         description="Draws trails that persist behind moving objects.",
     )
 
@@ -456,7 +519,7 @@ class SmoothAnimation(BaseModel):
 
     smooth: SmoothParams = Field(
         ...,
-        title="Smooth",
+        title="Smooth (Meta)",
         description="Smooths the output of another animation over time.",
     )
 
@@ -482,7 +545,7 @@ class ProximityAnimation(BaseModel):
 
     proximity: ProximityParams = Field(
         ...,
-        title="Proximity to Intensity",
+        title="Proximity to Intensity (Responsive)",
         description="Blends animations based on object distance to a point.",
     )
 
@@ -495,7 +558,7 @@ class ProximitySpeedAnimation(BaseModel):
 
     proximity_speed: ProximitySpeedParams = Field(
         ...,
-        title="Proximity to Speed",
+        title="Proximity to Speed (Responsive)",
         description="Increases the speed of the animation based on the distance to the target point.",
     )
 
@@ -521,8 +584,47 @@ class PersistAnimation(BaseModel):
 
     persist: PersistParams = Field(
         ...,
-        title="Persist",
+        title="Persist (Meta/Responsive)",
         description="Keeps objects alive for a sub-animation after they disappear.",
+    )
+
+    class Config:
+        extra = "forbid"  # Disallow other keys
+
+
+class DayOfWeekAnimation(BaseModel):
+    """Wrapper for the day_of_week animation."""
+
+    day_of_week: DayOfWeekParams = Field(
+        ...,
+        title="Day of Week (Meta)",
+        description="Schedule different animations for each day of the week.",
+    )
+
+    class Config:
+        extra = "forbid"  # Disallow other keys
+
+
+class ExponentialAtAnimation(BaseModel):
+    """Wrapper for the exponential_at animation."""
+
+    exponential_at: ExponentialAtParams = Field(
+        ...,
+        title="Exponential At",
+        description="Exponential falloff brightness based on proximity to a fixed point.",
+    )
+
+    class Config:
+        extra = "forbid"  # Disallow other keys
+
+
+class ByStripAnimation(BaseModel):
+    """Wrapper for the by_strip animation."""
+
+    by_strip: ByStripParams = Field(
+        ...,
+        title="By Strip (Meta)",
+        description="Assign different animations to specific LED strips.",
     )
 
     class Config:
@@ -567,10 +669,17 @@ AnimationModel = Union[
     ProximityAnimation,
     ProximitySpeedAnimation,
     PersistAnimation,
+    DayOfWeekAnimation,
+    ExponentialAtAnimation,
+    ByStripAnimation,
     PresetAnimation,
 ]
 
 # --- Rebuild Models to Resolve Forward References ---
+DayOfWeekParams.model_rebuild()
+ExponentialAtParams.model_rebuild()
+ByStripParams.model_rebuild()
+StripAssignmentParams.model_rebuild()
 AlternateParams.model_rebuild()
 FireParams.model_rebuild()
 RainbowParams.model_rebuild()

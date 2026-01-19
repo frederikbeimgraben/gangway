@@ -67,6 +67,7 @@ class Strip:
 class LED:
     index: int
     p: Point
+    strip_index: int = 0
 
 
 @dataclass

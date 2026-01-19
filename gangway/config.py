@@ -6,7 +6,7 @@ Definitions for LED positions
 import inspect
 import threading
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import List, Tuple
 
 import yaml
 from rpi_ws2805 import RGBCCT
@@ -93,8 +93,9 @@ class GANGWAYConfig:
                 LED(
                     i + strip.index,
                     interpolate_points(strip.start, strip.end, strip.len, i),
+                    strip_idx,
                 )
-                for strip in self.STRIPS
+                for strip_idx, strip in enumerate(self.STRIPS)
                 for i in range(strip.len)
             ]
 

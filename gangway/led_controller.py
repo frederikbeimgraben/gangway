@@ -6,11 +6,10 @@ Controller Thread for Animations
 import collections
 import time
 from threading import Thread
-from typing import Dict, List, Tuple
+from typing import Dict, List
 
 from rpi_ws2805 import RGBCCT, PixelStrip
 
-from . import config
 from .config import CONFIG, GANGWAYConfig
 from .defaults import (
     LED_BRIGHTNESS,

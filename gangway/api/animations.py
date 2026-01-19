@@ -13,7 +13,12 @@ from fastapi import APIRouter
 from pydantic import BaseModel
 from pydantic_core import PydanticUndefined
 
-from .models import AnimationModel, PresetParams, RGBCCTModel
+from .models import (
+    AnimationModel,
+    PresetParams,
+    RGBCCTModel,
+    StripAssignmentWrapper,
+)
 
 router = APIRouter()
 
@@ -40,6 +45,8 @@ def _get_type_info(annotation: Any) -> Dict[str, Any]:
         return {"name": "RGBCCT"}
     if annotation is PresetParams:
         return {"name": "Preset"}
+    if annotation is StripAssignmentWrapper:
+        return {"name": "StripAssignment"}
 
     origin = get_origin(annotation)
     args = get_args(annotation)

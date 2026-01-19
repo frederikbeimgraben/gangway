@@ -412,3 +412,107 @@ def preset(name: str, visited_presets: Optional[Set[str]] = None) -> Animation |
     return parse_animation(
         anim_config, ANIMATION_FUNCTIONS, visited_presets=new_visited
     )
+
+
+def day_of_week(
+    monday: Animation | RGBCCT = RGBCCT(),
+    tuesday: Animation | RGBCCT = RGBCCT(),
+    wednesday: Animation | RGBCCT = RGBCCT(),
+    thursday: Animation | RGBCCT = RGBCCT(),
+    friday: Animation | RGBCCT = RGBCCT(),
+    saturday: Animation | RGBCCT = RGBCCT(),
+    sunday: Animation | RGBCCT = RGBCCT(),
+) -> Animation:
+    days = [monday, tuesday, wednesday, thursday, friday, saturday, sunday]
+
+    def animation(
+        time: float,
+        ctx: SceneContext,
+        led: LED,
+        objects: Iterable[Point],
+        *args,
+        **kwargs,
+    ) -> RGBCCT:
+        # 0 = Monday, 6 = Sunday
+        weekday = datetime.datetime.now().weekday()
+        anim = days[weekday]
+
+        if isinstance(anim, RGBCCT):
+            return anim
+        return anim(time, ctx, led, objects, *args, **kwargs)
+
+    return animation
+
+
+def exponential_at(
+    primary: RGBCCT | Animation = RGBCCT(r=255),
+    secondary: RGBCCT | Animation = RGBCCT(g=255),
+    x: float = 0.0,
+    y: float = 0.0,
+    radius: float = 150,
+) -> Animation:
+    """
+    Like exponential, but based on a fixed point instead of objects.
+    """
+    target_point = Point(x=x, y=y)
+
+    def animation(
+        time: float,
+        ctx: SceneContext,
+        led: LED,
+        objects: Iterable[Point],
+        *args,
+        **kwargs,
+    ) -> RGBCCT:
+        intensity = 2 ** (-(led.p - target_point).length / radius)
+
+        primary_color = (
+            primary
+            if isinstance(primary, RGBCCT)
+            else primary(time, ctx, led, objects, *args, **kwargs)
+        )
+        secondary_color = (
+            secondary
+            if isinstance(secondary, RGBCCT)
+            else secondary(time, ctx, led, objects, *args, **kwargs)
+        )
+
+        return interpolate_rgbcct(
+            primary_color, secondary_color, intensity, use_sign=False
+        )
+
+    return animation
+
+
+def strip_assignment(
+    strip: int,
+    animation: Animation | RGBCCT,
+) -> Tuple[int, Animation | RGBCCT]:
+    return strip, animation
+
+
+def by_strip(
+    assignments: Iterable[Tuple[int, Animation | RGBCCT]] | None = None,
+    default: Animation | RGBCCT = RGBCCT(),
+) -> Animation:
+    if assignments is None:
+        mapping = {}
+    else:
+        mapping = dict(assignments)
+
+    def animation(
+        time: float,
+        ctx: SceneContext,
+        led: LED,
+        objects: Iterable[Point],
+        *args,
+        **kwargs,
+    ) -> RGBCCT:
+        idx = getattr(led, "strip_index", -1)
+        anim = mapping.get(idx, default)
+
+        if isinstance(anim, RGBCCT):
+            return anim
+        return anim(time, ctx, led, objects, *args, **kwargs)
+
+    return animation

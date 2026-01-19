@@ -265,6 +265,8 @@ function ParamInput({
     const isPresetName = () =>
         (param.type && param.type.name === "Preset") ||
         (animName === "preset" && param.name === "name");
+    const isStripAssignment = (typeObj) =>
+        typeObj && typeObj.name === "StripAssignment";
 
     // --- Determine Child Animation Availability ---
     const getChildAnimations = () => {
@@ -333,6 +335,114 @@ function ParamInput({
     if (isList(param.type)) {
         const list = Array.isArray(value) ? value : [];
         const innerType = param.type.args?.[0];
+
+        // List of StripAssignments
+        if (isStripAssignment(innerType)) {
+            const childAnims = getChildAnimations();
+            const addItem = () => {
+                const defaultAnim = childAnims[0]?.name || "static";
+                onChange([
+                    ...list,
+                    {
+                        strip_assignment: {
+                            strip: 0,
+                            animation: { [defaultAnim]: {} },
+                        },
+                    },
+                ]);
+            };
+
+            const updateItem = (idx, field, val) => {
+                const newList = [...list];
+                const item = { ...newList[idx] };
+                const sa = { ...(item.strip_assignment || {}) };
+                sa[field] = val;
+                item.strip_assignment = sa;
+                newList[idx] = item;
+                onChange(newList);
+            };
+
+            const removeItem = (idx) =>
+                onChange(list.filter((_, i) => i !== idx));
+
+            return (
+                <div className="space-y-2">
+                    {list.map((item, idx) => {
+                        const data = item.strip_assignment || {};
+                        return (
+                            <div
+                                key={idx}
+                                className="bg-gray-800 rounded relative p-2 pt-6 space-y-2"
+                            >
+                                <button
+                                    type="button"
+                                    onClick={() => removeItem(idx)}
+                                    className="absolute top-2 right-2 text-red-400 hover:text-red-300"
+                                    aria-label="Remove"
+                                    title="Remove"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-gray-400 text-xs uppercase font-bold tracking-wider">
+                                        Strip Index
+                                    </label>
+                                    <ParamInput
+                                        param={{
+                                            name: "strip",
+                                            type: { name: "int" },
+                                        }}
+                                        value={data.strip}
+                                        onChange={(val) =>
+                                            updateItem(idx, "strip", val)
+                                        }
+                                        allAnimations={allAnimations}
+                                        presets={presets}
+                                        animName="strip_assignment"
+                                    />
+                                </div>
+
+                                <div className="flex flex-col gap-1">
+                                    <label className="text-gray-400 text-xs uppercase font-bold tracking-wider">
+                                        Animation
+                                    </label>
+                                    <ParamInput
+                                        param={{
+                                            name: "animation",
+                                            type: {
+                                                name: "Union",
+                                                args: [
+                                                    {
+                                                        name: "Animation",
+                                                        module: "any",
+                                                    },
+                                                    { name: "RGBCCT" },
+                                                ],
+                                            },
+                                        }}
+                                        value={data.animation}
+                                        onChange={(val) =>
+                                            updateItem(idx, "animation", val)
+                                        }
+                                        allAnimations={allAnimations}
+                                        presets={presets}
+                                        animName="strip_assignment"
+                                    />
+                                </div>
+                            </div>
+                        );
+                    })}
+                    <button
+                        type="button"
+                        onClick={addItem}
+                        className="text-teal-400 text-xs hover:text-teal-300"
+                    >
+                        + Add Strip Assignment
+                    </button>
+                </div>
+            );
+        }
 
         // List of Colors
         if (isColor(innerType)) {
