@@ -89,6 +89,13 @@ def save_preset(name: str, animation: Optional[AnimationModel] = None):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save preset: {e}")
 
+    # Reload the system configuration
+    CONFIG.load()
+
+    # Reload LED Controller if active
+    if STATE.led_controller:
+        STATE.led_controller.reload_config()
+
     return {"message": f"Preset '{name}' saved"}
 
 
