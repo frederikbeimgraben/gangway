@@ -13,6 +13,7 @@ export default function AnimationEditor({
     allAnimations, // The complete list of all animations (for nested editors)
     presets = [],
     isRoot = false, // Flag to indicate if this is a top-level editor
+    isDeletable = false,
 }) {
     const [selectedAnimName, setSelectedAnimName] = useState("");
     const [params, setParams] = useState({});
@@ -82,7 +83,7 @@ export default function AnimationEditor({
                 <select
                     value={selectedAnimName}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    className="w-[calc(100%-2.5rem)] bg-gray-700 text-white rounded px-3 py-2 outline-none text-sm focus:ring-0"
+                    className={`${isDeletable ? "w-[calc(100%-2.5rem)]" : "w-full"} bg-gray-700 text-white rounded px-3 py-2 outline-none text-sm focus:ring-0`}
                 >
                     <option value="" disabled>
                         Select Animation
@@ -181,7 +182,7 @@ const ColorInputs = ({ value: colorValue, onChange: onColorChange }) => {
     };
 
     return (
-        <div className="flex items-center gap-2 w-[calc(100%-2.5rem)]">
+        <div className="flex items-center gap-2 w-full">
             {/* Color Picker Button */}
             <div className="relative w-8 h-8 shrink-0">
                 <input
@@ -199,7 +200,7 @@ const ColorInputs = ({ value: colorValue, onChange: onColorChange }) => {
             </div>
 
             {/* Numeric Inputs */}
-            <div className="grid grid-cols-5 gap-1 flex-1 w-[calc(100%-2.5rem)]">
+            <div className="grid grid-cols-5 gap-1 flex-1 w-full">
                 {["r", "g", "b", "cw", "ww"].map((chan) => (
                     <input
                         key={chan}
@@ -317,6 +318,7 @@ function ParamInput({
                             onChange={(val) => updateItem(idx, val)}
                             availableAnimations={childAnims}
                             allAnimations={allAnimations}
+                            isDeletable={true}
                         />
                     </div>
                 ))}
@@ -522,6 +524,7 @@ function ParamInput({
                                 onChange={(val) => updateItem(idx, val)}
                                 availableAnimations={childAnims}
                                 allAnimations={allAnimations}
+                                isDeletable={true}
                             />
                         </div>
                     ))}
@@ -595,7 +598,7 @@ function ParamInput({
             <select
                 value={value ?? ""}
                 onChange={(e) => onChange(e.target.value)}
-                className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none w-[calc(100%-2.5rem)]"
+                className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none w-full"
             >
                 <option value="" disabled>
                     Select a preset...
@@ -616,7 +619,7 @@ function ParamInput({
             <select
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none w-[calc(100%-2.5rem)]"
+                className="bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none w-full"
             >
                 {options.map((opt) => (
                     <option key={opt} value={opt}>
@@ -656,7 +659,7 @@ function ParamInput({
                 type="time"
                 value={value ?? ""}
                 onChange={(e) => onChange(e.target.value)}
-                className="w-[calc(100%-2.5rem)] bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none [color-scheme:dark]"
+                className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none [color-scheme:dark]"
             />
         );
     }
@@ -704,7 +707,7 @@ function ParamInput({
                 value={value ?? ""}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                className="w-[calc(100%-2.5rem)] bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none invalid:!border-red-500 invalid:!text-red-500"
+                className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none invalid:!border-red-500 invalid:!text-red-500"
                 step={isInt ? "1" : "any"}
                 {...(param.min !== null && { min: param.min })}
                 {...(param.max !== null && { max: param.max })}
@@ -718,7 +721,7 @@ function ParamInput({
             type="text"
             value={value ?? ""}
             onChange={(e) => onChange(e.target.value)}
-            className="w-[calc(100%-2.5rem)] bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none"
+            className="w-full bg-gray-900 border border-gray-700 rounded px-2 py-1 text-sm text-gray-300 focus:border-teal-500 outline-none"
         />
     );
 }
