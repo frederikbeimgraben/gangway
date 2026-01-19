@@ -114,6 +114,6 @@ animation:
     end: '23:00'
     primary:
       preset:
-        name: Secret-Rave
+        name: Secret-Rave-Rainbow-Trails
     secondary:
       'off': {}
