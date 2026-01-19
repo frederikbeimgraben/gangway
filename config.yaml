@@ -109,11 +109,7 @@ strips:
   - 82.5
   - 490.0
 animation:
-  schedule:
-    start: 08:00
-    end: '23:00'
-    primary:
-      preset:
-        name: Secret-Rave-Rainbow-Trails
-    secondary:
-      'off': {}
+  linear_rainbow:
+    direction: y
+    speed: 0.1
+    spread: 3.0
