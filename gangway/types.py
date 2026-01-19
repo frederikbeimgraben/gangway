@@ -1,25 +1,25 @@
-from dataclasses import dataclass
-from typing import Callable, Iterable, List, Tuple, Union
+from dataclasses import dataclass, replace
+from typing import Callable, Iterable, List, Self, Tuple, Union
 
 from rpi_ws2805 import RGBCCT
 
 
 @dataclass
 class Point:
-    x: Union[float, int]
-    y: Union[float, int]
+    x: Union[float, int] = 0.0
+    y: Union[float, int] = 0.0
 
-    def __sub__(self, other: "Point") -> "Point":
-        return Point(x=other.x - self.x, y=other.y - self.y)
+    def __sub__(self: Self, other: Self) -> Self:
+        return replace(self, x=other.x - self.x, y=other.y - self.y)
 
-    def __add__(self, other: "Point") -> "Point":
-        return Point(x=self.x + other.x, y=self.y + other.y)
+    def __add__(self: Self, other: Self) -> Self:
+        return replace(self, x=self.x + other.x, y=self.y + other.y)
 
-    def __mul__(self, other: Union[float, int]) -> "Point":
-        return Point(x=self.x * other, y=self.y * other)
+    def __mul__(self: Self, other: Union[float, int]) -> Self:
+        return replace(self, x=self.x * other, y=self.y * other)
 
-    def __truediv__(self, other: Union[float, int]) -> "Point":
-        return Point(x=self.x / other, y=self.y / other)
+    def __truediv__(self: Self, other: Union[float, int]) -> Self:
+        return replace(self, x=self.x / other, y=self.y / other)
 
     @property
     def tuple(self) -> Tuple:
@@ -30,8 +30,14 @@ class Point:
         return (self.x**2 + self.y**2) ** 0.5
 
     @classmethod
-    def from_tuple(cls, tuple: Tuple[float, float]) -> "Point":
-        return Point(tuple[0], tuple[1])
+    def from_tuple(cls, t: Tuple[float, float]) -> Self:
+        return cls(*t)
+
+
+@dataclass
+class TrackedPoint(Point):
+    id: int = 0
+    timestamp: float = 0.0
 
 
 @dataclass
@@ -81,7 +87,7 @@ Animation = Callable[
         float,  # Time since start in seconds
         SceneContext,  # Floor profile and other LEDs
         LED,  # LED to generate color for
-        Iterable[Point],  # Detected objects (persons as coordinates)
+        Iterable[TrackedPoint],  # Detected objects (persons as coordinates)
     ],
     RGBCCT,
 ]

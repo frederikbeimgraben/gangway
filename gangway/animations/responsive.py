@@ -8,7 +8,7 @@ from typing import Iterable, List, Tuple
 from rpi_ws2805 import RGBCCT
 
 from ..helpers import interpolate_rgbcct
-from ..types import LED, Animation, Point, SceneContext
+from ..types import LED, Animation, SceneContext, TrackedPoint
 from .idle import wave
 
 
@@ -21,7 +21,7 @@ def exponential(
         time: float,
         ctx: SceneContext,
         led: LED,
-        objects: Iterable[Point],
+        objects: Iterable[TrackedPoint],
     ) -> RGBCCT:
         objects = list(objects)
         intensity = (
@@ -58,7 +58,7 @@ def dot(
         time: float,
         ctx: SceneContext,
         led: LED,
-        objects: Iterable[Point],
+        objects: Iterable[TrackedPoint],
     ) -> RGBCCT:
         primary_rgbcct: RGBCCT
 
@@ -104,7 +104,7 @@ def paint(
         time: float,
         ctx: SceneContext,
         led: LED,
-        objects: Iterable[Point],
+        objects: Iterable[TrackedPoint],
     ) -> RGBCCT:
         nonlocal history, last_frame_time, last_sample_time, active_points
 

@@ -10,7 +10,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from threading import Lock, Thread
 from typing import Callable, Dict, List, Optional, Tuple
 
-from ..config import Point
+from ..types import TrackedPoint
 from .homographic_projection import apply_transform
 from .model import DeleteTrack, Event, EventObject, create_events_from_json
 
@@ -39,7 +39,7 @@ def create_xovis_request_handler(server: "XOVISServer"):
 
 class XOVISServer:
     _subscribers: List[Tuple[Callable[[Event], None], Optional[List[Event]]]]
-    _subscribers_position: List[Callable[[List[Point]], None]]
+    _subscribers_position: List[Callable[[List[TrackedPoint]], None]]
     _host: str
     _port: int
 
@@ -62,7 +62,9 @@ class XOVISServer:
     ) -> None:
         self._subscribers.append((callback, filter))
 
-    def subscribe_position(self, callback: Callable[[List[Point]], None]) -> None:
+    def subscribe_position(
+        self, callback: Callable[[List[TrackedPoint]], None]
+    ) -> None:
         self._subscribers_position.append(callback)
 
     @property
@@ -107,8 +109,14 @@ class XOVISServer:
                 callback([])
             return
 
-        points = [(object.x, object.y) for object in self._objects.values()]
-        mapped_points = [Point(r[0], r[1]) for r in apply_transform(points)]
+        objects_values = list(self._objects.values())
+        points = [(obj.x, obj.y) for obj in objects_values]
+        mapped_points = [
+            TrackedPoint(
+                r[0], r[1], id=obj.id, timestamp=self._timestamps[obj.id] / 1000.0
+            )
+            for r, obj in zip(apply_transform(points), objects_values)
+        ]
 
         for callback in self._subscribers_position:
             callback(mapped_points)

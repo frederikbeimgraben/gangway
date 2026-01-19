@@ -281,6 +281,15 @@ class ExponentialAtParams(BaseModel):
     radius: float = Field(default=150, ge=0)
 
 
+class ExtrapolateParams(BaseModel):
+    """Parameters for the extrapolate animation."""
+
+    animation: Union["AnimationModel", RGBCCTModel] = Field(
+        default=RGBCCTModel(r=255, g=255, b=255, cw=0, ww=0)
+    )
+    latency: float = Field(default=0.0)
+
+
 class StripAssignmentParams(BaseModel):
     strip: int
     animation: Union["AnimationModel", RGBCCTModel]
@@ -618,6 +627,19 @@ class ExponentialAtAnimation(BaseModel):
         extra = "forbid"  # Disallow other keys
 
 
+class ExtrapolateAnimation(BaseModel):
+    """Wrapper for the extrapolate animation."""
+
+    extrapolate: ExtrapolateParams = Field(
+        ...,
+        title="Extrapolate (Meta/Responsive)",
+        description="Extrapolates object positions to compensate for latency.",
+    )
+
+    class Config:
+        extra = "forbid"  # Disallow other keys
+
+
 class ByStripAnimation(BaseModel):
     """Wrapper for the by_strip animation."""
 
@@ -671,6 +693,7 @@ AnimationModel = Union[
     PersistAnimation,
     DayOfWeekAnimation,
     ExponentialAtAnimation,
+    ExtrapolateAnimation,
     ByStripAnimation,
     PresetAnimation,
 ]
@@ -678,6 +701,7 @@ AnimationModel = Union[
 # --- Rebuild Models to Resolve Forward References ---
 DayOfWeekParams.model_rebuild()
 ExponentialAtParams.model_rebuild()
+ExtrapolateParams.model_rebuild()
 ByStripParams.model_rebuild()
 StripAssignmentParams.model_rebuild()
 AlternateParams.model_rebuild()
@@ -698,9 +722,3 @@ ScheduleParams.model_rebuild()
 PaintParams.model_rebuild()
 LinearRainbowParams.model_rebuild()
 SmoothParams.model_rebuild()
-PlasmaParams.model_rebuild()
-ProximityParams.model_rebuild()
-ProximitySpeedParams.model_rebuild()
-SparkleParams.model_rebuild()
-PersistParams.model_rebuild()
-PresetParams.model_rebuild()

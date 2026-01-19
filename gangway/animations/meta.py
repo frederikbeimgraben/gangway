@@ -11,7 +11,7 @@ import yaml
 from rpi_ws2805 import RGBCCT
 
 from ..helpers import interpolate_rgbcct, parse_animation
-from ..types import LED, Animation, Point, SceneContext
+from ..types import LED, Animation, Point, SceneContext, TrackedPoint
 
 
 def alternate(
@@ -25,7 +25,7 @@ def alternate(
         time: float,
         _ctx: SceneContext,
         led: LED,
-        objects: Iterable[Point],
+        objects: Iterable[TrackedPoint],
         *_args,
         **_kwargs,
     ) -> RGBCCT:
@@ -47,7 +47,7 @@ def blend(
         time: float,
         _ctx: SceneContext,
         led: LED,
-        objects: Iterable[Point],
+        objects: Iterable[TrackedPoint],
         *_args,
         **_kwargs,
     ) -> RGBCCT:
@@ -89,7 +89,7 @@ def schedule(
         time: float,
         ctx: SceneContext,
         led: LED,
-        objects: Iterable[Point],
+        objects: Iterable[TrackedPoint],
         *args,
         **kwargs,
     ) -> RGBCCT:
@@ -133,7 +133,7 @@ def smooth(
         time: float,
         ctx: SceneContext,
         led: LED,
-        objects: Iterable[Point],
+        objects: Iterable[TrackedPoint],
         *args,
         **kwargs,
     ) -> RGBCCT:
@@ -190,14 +190,14 @@ def persist(
     after they are no longer detected.
     """
     # {object_id: (Point, last_seen_time)}
-    persisted_objects: Dict[int, Tuple[Point, float]] = {}
+    persisted_objects: Dict[int, Tuple[TrackedPoint, float]] = {}
     last_frame_time = -1.0
 
     def func(
         time: float,
         ctx: SceneContext,
         led: LED,
-        objects: Iterable[Point],
+        objects: Iterable[TrackedPoint],
         *args,
         **kwargs,
     ) -> RGBCCT:
@@ -247,13 +247,13 @@ def proximity(
     Blends between primary and secondary based on the closest object's
     distance to a target point.
     """
-    target_point = Point(x=x, y=y)
+    target_point = TrackedPoint(x=x, y=y)
 
     def animation(
         time: float,
         ctx: SceneContext,
         led: LED,
-        objects: Iterable[Point],
+        objects: Iterable[TrackedPoint],
         *args,
         **kwargs,
     ) -> RGBCCT:
@@ -328,13 +328,13 @@ def proximity_speed(
     Increases the speed of the animation based on the distance to the target point.
     """
 
-    target_point = Point(x=x, y=y)
+    target_point = TrackedPoint(x=x, y=y)
 
     def _animation(
         time: float,
         ctx: SceneContext,
         led: LED,
-        objects: Iterable[Point],
+        objects: Iterable[TrackedPoint],
         *args,
         **kwargs,
     ) -> RGBCCT:
@@ -429,7 +429,7 @@ def day_of_week(
         time: float,
         ctx: SceneContext,
         led: LED,
-        objects: Iterable[Point],
+        objects: Iterable[TrackedPoint],
         *args,
         **kwargs,
     ) -> RGBCCT:
@@ -454,13 +454,13 @@ def exponential_at(
     """
     Like exponential, but based on a fixed point instead of objects.
     """
-    target_point = Point(x=x, y=y)
+    target_point = TrackedPoint(x=x, y=y)
 
     def animation(
         time: float,
         ctx: SceneContext,
         led: LED,
-        objects: Iterable[Point],
+        objects: Iterable[TrackedPoint],
         *args,
         **kwargs,
     ) -> RGBCCT:
@@ -504,7 +504,7 @@ def by_strip(
         time: float,
         ctx: SceneContext,
         led: LED,
-        objects: Iterable[Point],
+        objects: Iterable[TrackedPoint],
         *args,
         **kwargs,
     ) -> RGBCCT:
@@ -516,3 +516,74 @@ def by_strip(
         return anim(time, ctx, led, objects, *args, **kwargs)
 
     return animation
+
+
+def extrapolate(animation: Animation | RGBCCT, latency: float = 0.0) -> Animation:
+    last_object_state: Dict[int, Tuple[TrackedPoint, float]] = {}
+    object_velocities: Dict[int, TrackedPoint] = {}
+    last_processed_instance: Dict[int, int] = {}
+
+    def func(
+        time: float,
+        ctx: SceneContext,
+        led: LED,
+        objects: Iterable[TrackedPoint],
+        *args,
+        **kwargs,
+    ) -> RGBCCT:
+        nonlocal last_object_state, object_velocities, last_processed_instance
+
+        current_objects = list(objects)
+        predicted_objects = []
+        current_ids = set()
+
+        for obj in current_objects:
+            obj_id = obj.id
+
+            if obj_id is None:
+                predicted_objects.append(obj)
+                continue
+
+            current_ids.add(obj_id)
+            pid = id(obj)
+
+            # Check if new measurement
+            if last_processed_instance.get(obj_id) != pid:
+                obj_time = obj.timestamp
+                prev_pos, prev_time = last_object_state.get(obj_id, (obj, obj_time))
+
+                if obj_id not in last_object_state:
+                    object_velocities[obj_id] = TrackedPoint(0, 0)
+                else:
+                    dt = obj_time - prev_time
+                    if dt > 0.001:
+                        object_velocities[obj_id] = (obj - prev_pos) / dt
+
+                last_object_state[obj_id] = (obj, obj_time)
+                last_processed_instance[obj_id] = pid
+
+            # Extrapolate
+            vel = object_velocities.get(obj_id, TrackedPoint(0, 0))
+            predicted = obj + vel * latency * (-1)
+
+            if isinstance(obj, TrackedPoint):
+                predicted = TrackedPoint(predicted.x, predicted.y, id=obj.id)
+
+            predicted_objects.append(predicted)
+
+        # Prune old IDs
+        keys = list(last_object_state.keys())
+        for k in keys:
+            if k not in current_ids:
+                del last_object_state[k]
+                if k in object_velocities:
+                    del object_velocities[k]
+                if k in last_processed_instance:
+                    del last_processed_instance[k]
+
+        if isinstance(animation, RGBCCT):
+            return animation
+
+        return animation(time, ctx, led, predicted_objects, *args, **kwargs)
+
+    return func

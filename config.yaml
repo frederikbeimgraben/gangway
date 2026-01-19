@@ -109,5 +109,11 @@ strips:
   - 82.5
   - 490.0
 animation:
-  preset:
-    name: Jakob
+  schedule:
+    start: 08:00
+    end: '23:00'
+    primary:
+      preset:
+        name: Secret-Rave
+    secondary:
+      'off': {}

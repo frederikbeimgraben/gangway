@@ -20,7 +20,7 @@ from .defaults import (
     LED_PIN,
     WS2805_STRIP,
 )
-from .types import LED, Animation, Point, Rectangle, SceneContext
+from .types import LED, Animation, Rectangle, SceneContext, TrackedPoint
 
 
 class LEDController(Thread):
@@ -39,7 +39,7 @@ class LEDController(Thread):
 
     # State
     current_colors: Dict[int, RGBCCT]
-    last_objects: List[Point]  # An object is equivalent to a detected person
+    last_objects: List[TrackedPoint]  # An object is equivalent to a detected person
 
     # Time counters
     init_time: float
@@ -94,7 +94,7 @@ class LEDController(Thread):
         self.running = False
         self.join()
 
-    def update_objects(self, objects: List[Point] = []) -> None:
+    def update_objects(self, objects: List[TrackedPoint] = []) -> None:
         """
         Inform the Thread of new objects to render.
         Will switch the thread to idle animation if called without parameters or empty list.

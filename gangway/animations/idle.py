@@ -3,7 +3,6 @@
 Idle Animation Definitions
 """
 
-import datetime
 import math
 import random
 from typing import Iterable, List, Literal
@@ -11,7 +10,7 @@ from typing import Iterable, List, Literal
 from rpi_ws2805 import RGBCCT
 
 from ..helpers import interpolate_rgbcct
-from ..types import LED, Animation, Point, SceneContext
+from ..types import LED, Animation, SceneContext, TrackedPoint
 from .meta import alternate, blend
 
 
@@ -237,7 +236,7 @@ def idle(
         time: float,
         ctx: SceneContext,
         led: LED,
-        objects: Iterable[Point],
+        objects: Iterable[TrackedPoint],
         *_args,
         **_kwargs,
     ) -> RGBCCT:
