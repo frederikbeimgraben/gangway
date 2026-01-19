@@ -70,6 +70,23 @@ const PlusIcon = ({ className }) => (
     </svg>
 );
 
+const RenameIcon = ({ className }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        strokeWidth={1.5}
+        stroke="currentColor"
+        className={className}
+    >
+        <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L6.832 19.82a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897L16.863 4.487Zm0 0L19.5 7.125"
+        />
+    </svg>
+);
+
 export default function PresetsManager({
     presets = [],
     animations = [],
@@ -81,6 +98,8 @@ export default function PresetsManager({
     const [loading, setLoading] = useState(false);
     const [editingPresetName, setEditingPresetName] = useState(null);
     const [editingConfig, setEditingConfig] = useState(null);
+    const [renamingPresetName, setRenamingPresetName] = useState(null);
+    const [newRenamedName, setNewRenamedName] = useState("");
 
     const getApiKey = () => {
         if (typeof window !== "undefined") {
@@ -230,6 +249,48 @@ export default function PresetsManager({
         }
     };
 
+    const handleRenameClick = (name) => {
+        setRenamingPresetName(name);
+        setNewRenamedName(name);
+    };
+
+    const handlePerformRename = async () => {
+        if (!renamingPresetName || !newRenamedName.trim()) return;
+        if (renamingPresetName === newRenamedName.trim()) {
+            setRenamingPresetName(null);
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const apiKey = getApiKey();
+            const headers = apiKey ? { "X-API-Key": apiKey } : {};
+            const res = await fetch(
+                `/api/presets/${renamingPresetName}/rename?new_name=${encodeURIComponent(
+                    newRenamedName.trim(),
+                )}`,
+                {
+                    method: "POST",
+                    headers,
+                },
+            );
+
+            if (res.ok) {
+                showSnackbar?.("Preset renamed", "success");
+                setRenamingPresetName(null);
+                onPresetsChanged?.();
+            } else {
+                const err = await res.json();
+                showSnackbar?.(`Failed to rename: ${err.detail}`, "error");
+            }
+        } catch (error) {
+            console.error(error);
+            showSnackbar?.("Error renaming preset", "error");
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return (
         <div className="bg-gray-800 p-6 rounded-lg shadow-lg mt-6">
             <h2 className="text-xl font-semibold mb-6 text-teal-300 flex items-center gap-2">
@@ -290,10 +351,19 @@ export default function PresetsManager({
                                 </button>
                                 <button
                                     type="button"
+                                    onClick={() => handleRenameClick(name)}
+                                    disabled={loading}
+                                    className="p-2 text-yellow-400 hover:bg-gray-500 rounded-md transition-colors"
+                                    title="Rename Preset"
+                                >
+                                    <RenameIcon className="w-5 h-5" />
+                                </button>
+                                <button
+                                    type="button"
                                     onClick={() => handleEditPreset(name)}
                                     disabled={loading}
                                     className="p-2 text-blue-400 hover:bg-gray-500 rounded-md transition-colors"
-                                    title="Edit Preset"
+                                    title="Edit Preset Config"
                                 >
                                     <EditIcon className="w-5 h-5" />
                                 </button>
@@ -362,6 +432,69 @@ export default function PresetsManager({
                                 className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-500 disabled:opacity-50 transition-colors"
                             >
                                 {loading ? "Saving..." : "Save Changes"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Rename Modal */}
+            {renamingPresetName && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
+                    <div className="bg-gray-800 rounded-lg shadow-xl w-full max-w-md border border-gray-700">
+                        <div className="p-4 border-b border-gray-700 flex justify-between items-center bg-gray-900 rounded-t-lg">
+                            <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                <RenameIcon className="w-5 h-5 text-yellow-400" />
+                                Rename Preset
+                            </h3>
+                            <button
+                                onClick={() => setRenamingPresetName(null)}
+                                className="text-gray-400 hover:text-white transition-colors"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="p-6">
+                            <label className="block text-gray-400 text-sm mb-2">
+                                New Name
+                            </label>
+                            <input
+                                type="text"
+                                value={newRenamedName}
+                                onChange={(e) =>
+                                    setNewRenamedName(e.target.value)
+                                }
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter") {
+                                        e.preventDefault();
+                                        handlePerformRename();
+                                    }
+                                }}
+                                className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 text-white"
+                                autoFocus
+                            />
+                            <p className="text-xs text-gray-500 mt-2">
+                                Allowed characters: letters, numbers, spaces,
+                                hyphens, underscores.
+                            </p>
+                        </div>
+                        <div className="p-4 border-t border-gray-700 flex justify-end gap-2 bg-gray-900 rounded-b-lg">
+                            <button
+                                onClick={() => setRenamingPresetName(null)}
+                                className="px-4 py-2 bg-gray-700 text-white rounded hover:bg-gray-600 transition-colors"
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                onClick={handlePerformRename}
+                                disabled={
+                                    loading ||
+                                    !newRenamedName.trim() ||
+                                    newRenamedName === renamingPresetName
+                                }
+                                className="px-4 py-2 bg-teal-600 text-white rounded hover:bg-teal-500 disabled:opacity-50 transition-colors"
+                            >
+                                {loading ? "Renaming..." : "Rename"}
                             </button>
                         </div>
                     </div>

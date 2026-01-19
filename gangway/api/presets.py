@@ -1,3 +1,4 @@
+import re
 from typing import Any, List, Optional
 
 import yaml
@@ -13,6 +14,14 @@ router = APIRouter()
 # Ensure presets directory exists
 PRESETS_DIR = CONFIG.path.parent / "presets"
 PRESETS_DIR.mkdir(exist_ok=True)
+
+
+def validate_preset_name(name: str):
+    if not re.match(r"^[a-zA-Z0-9 \-_]+$", name):
+        raise HTTPException(
+            status_code=400,
+            detail="Preset name must only contain alphanumeric characters, spaces, hyphens, and underscores.",
+        )
 
 
 def find_preset_usage(data: Any, target_name: str) -> bool:
@@ -34,6 +43,30 @@ def find_preset_usage(data: Any, target_name: str) -> bool:
                 return True
 
     return False
+
+
+def update_preset_references(data: Any, old_name: str, new_name: str) -> bool:
+    updated = False
+    if isinstance(data, dict):
+        if "preset" in data:
+            val = data["preset"]
+            if val == old_name:
+                data["preset"] = new_name
+                updated = True
+            elif isinstance(val, dict) and val.get("name") == old_name:
+                val["name"] = new_name
+                updated = True
+
+        for value in data.values():
+            if update_preset_references(value, old_name, new_name):
+                updated = True
+
+    elif isinstance(data, list):
+        for item in data:
+            if update_preset_references(item, old_name, new_name):
+                updated = True
+
+    return updated
 
 
 class PresetModel(BaseModel):
@@ -69,6 +102,8 @@ def save_preset(name: str, animation: Optional[AnimationModel] = None):
     If animation data is provided, it saves that.
     If no body is provided, it saves the currently active animation configuration.
     """
+    validate_preset_name(name)
+
     if animation is None:
         try:
             # Read current configuration from disk to get the active animation
@@ -130,6 +165,73 @@ def load_preset(name: str):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to load/apply preset: {e}")
+
+
+@router.post("/{name}/rename")
+def rename_preset(name: str, new_name: str):
+    """Rename a preset."""
+    validate_preset_name(new_name)
+
+    old_path = PRESETS_DIR / f"{name}.yaml"
+    new_path = PRESETS_DIR / f"{new_name}.yaml"
+
+    if not old_path.exists():
+        raise HTTPException(status_code=404, detail="Preset not found")
+
+    if new_path.exists():
+        raise HTTPException(
+            status_code=400, detail=f"Preset '{new_name}' already exists"
+        )
+
+    # Rename the file first
+    try:
+        old_path.rename(new_path)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Failed to rename preset file: {e}"
+        )
+
+    # Update references in active configuration
+    try:
+        with open(CONFIG.path, "r") as f:
+            config_data = yaml.safe_load(f)
+
+        if update_preset_references(config_data.get("animation"), name, new_name):
+            with open(CONFIG.path, "w") as f:
+                yaml.dump(config_data, f, sort_keys=False)
+
+            # Reload the system configuration
+            CONFIG.load()
+
+            # Reload LED Controller if active
+            if STATE.led_controller:
+                STATE.led_controller.reload_config()
+
+    except Exception as e:
+        # Rollback: rename file back
+        try:
+            new_path.rename(old_path)
+        except Exception:
+            pass
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to update active config references (changes rolled back): {e}",
+        )
+
+    # Update references in other presets (including the renamed one if it references itself)
+    for p in PRESETS_DIR.glob("*.yaml"):
+        try:
+            with open(p, "r") as f:
+                content = yaml.safe_load(f)
+
+            if update_preset_references(content, name, new_name):
+                with open(p, "w") as f:
+                    yaml.dump(content, f, sort_keys=False)
+        except Exception as e:
+            # We log the error but don't fail the request as the main rename succeeded
+            print(f"Failed to update references in preset '{p.stem}': {e}")
+
+    return {"message": f"Preset '{name}' renamed to '{new_name}'"}
 
 
 @router.delete("/{name}")
