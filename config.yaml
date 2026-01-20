@@ -109,7 +109,19 @@ strips:
   - 82.5
   - 490.0
 animation:
-  linear_rainbow:
-    direction: y
-    speed: 0.1
-    spread: 3.0
+  persist:
+    animation:
+      paint:
+        primary:
+          plasma:
+            speed: 0.5
+            scale: 0.05
+        secondary:
+          r: 0
+          g: 255
+          b: 255
+          cw: 128
+          ww: 0
+        radius: 50.0
+        persistence: 0.5
+    duration: 2.0

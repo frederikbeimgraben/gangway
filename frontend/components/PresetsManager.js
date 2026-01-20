@@ -1,93 +1,100 @@
-import { useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import AnimationEditor from "./AnimationEditor";
 
-// Simple Icons to avoid external dependencies
 const PlayIcon = ({ className }) => (
     <svg
-        xmlns="http://www.w3.org/2000/svg"
+        className={className}
         fill="none"
         viewBox="0 0 24 24"
-        strokeWidth={1.5}
         stroke="currentColor"
-        className={className}
     >
         <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"
+            strokeWidth={2}
+            d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"
+        />
+        <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
         />
     </svg>
 );
 
 const EditIcon = ({ className }) => (
     <svg
-        xmlns="http://www.w3.org/2000/svg"
+        className={className}
         fill="none"
         viewBox="0 0 24 24"
-        strokeWidth={1.5}
         stroke="currentColor"
-        className={className}
     >
         <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10"
+            strokeWidth={2}
+            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
         />
     </svg>
 );
 
 const TrashIcon = ({ className }) => (
     <svg
-        xmlns="http://www.w3.org/2000/svg"
+        className={className}
         fill="none"
         viewBox="0 0 24 24"
-        strokeWidth={1.5}
         stroke="currentColor"
-        className={className}
     >
         <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+            strokeWidth={2}
+            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
         />
     </svg>
 );
 
 const PlusIcon = ({ className }) => (
     <svg
-        xmlns="http://www.w3.org/2000/svg"
+        className={className}
         fill="none"
         viewBox="0 0 24 24"
-        strokeWidth={1.5}
         stroke="currentColor"
-        className={className}
     >
         <path
             strokeLinecap="round"
             strokeLinejoin="round"
-            d="M12 4.5v15m7.5-7.5h-15"
+            strokeWidth={2}
+            d="M12 4v16m8-8H4"
         />
     </svg>
 );
 
 const RenameIcon = ({ className }) => (
     <svg
-        xmlns="http://www.w3.org/2000/svg"
+        className={className}
         fill="none"
         viewBox="0 0 24 24"
-        strokeWidth={1.5}
         stroke="currentColor"
-        className={className}
     >
-        <path d="m 12.257897,4.6074221 h 7.435547 -3.71875 V 19.392578 h -3.716797 7.435547 m -5.742188,-2.543034 -7.5197,-1e-6 c -1.350375,0 -2.4375,-1.087125 -2.4375,-2.4375 V 9.5330171 c 0,-1.3503748 1.087125,-2.4374997 2.4375,-2.4374997 l 7.5197,4e-7 m 3.985932,0.054938 c 1.174171,0.1767189 2.068756,1.1850629 2.068756,2.4100327 v 4.8790225 c 0,1.22497 -0.894585,2.233314 -2.068756,2.410033" />
+        <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"
+        />
     </svg>
 );
 
 export default function PresetsManager({
     presets = [],
     animations = [],
-    onPresetLoaded,
     onPresetsChanged,
+    onPresetLoaded,
     showSnackbar,
 }) {
     const [newPresetName, setNewPresetName] = useState("");
@@ -96,6 +103,23 @@ export default function PresetsManager({
     const [editingConfig, setEditingConfig] = useState(null);
     const [renamingPresetName, setRenamingPresetName] = useState(null);
     const [newRenamedName, setNewRenamedName] = useState("");
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (mounted && (editingPresetName || renamingPresetName)) {
+            document.body.style.overflow = "hidden";
+        } else if (mounted) {
+            document.body.style.overflow = "";
+        }
+        return () => {
+            if (typeof document !== "undefined")
+                document.body.style.overflow = "";
+        };
+    }, [mounted, editingPresetName, renamingPresetName]);
 
     const getApiKey = () => {
         if (typeof window !== "undefined") {
@@ -108,31 +132,27 @@ export default function PresetsManager({
         const name = newPresetName.trim();
         if (!name) return;
 
-        if (presets.includes(name)) {
-            showSnackbar?.("Preset name already exists", "error");
-            return;
-        }
-
         setLoading(true);
         try {
             const apiKey = getApiKey();
-            const headers = apiKey ? { "X-API-Key": apiKey } : {};
-            // Save current active config as preset
-            const res = await fetch(`/api/presets/${name}`, {
-                method: "POST",
-                headers,
-            });
+            const res = await fetch(
+                `/api/presets/${encodeURIComponent(name)}`,
+                {
+                    method: "POST",
+                    headers: apiKey ? { "X-API-Key": apiKey } : {},
+                },
+            );
+
             if (res.ok) {
-                showSnackbar?.("Preset saved", "success");
                 setNewPresetName("");
-                onPresetsChanged?.();
+                onPresetsChanged();
+                showSnackbar("Preset saved successfully!", "success");
             } else {
                 const err = await res.json();
-                showSnackbar?.(`Failed to save: ${err.detail}`, "error");
+                showSnackbar(`Error: ${err.detail || res.statusText}`, "error");
             }
-        } catch (error) {
-            console.error(error);
-            showSnackbar?.("Error saving preset", "error");
+        } catch (e) {
+            showSnackbar(`Error saving preset: ${e.message}`, "error");
         } finally {
             setLoading(false);
         }
@@ -142,18 +162,21 @@ export default function PresetsManager({
         setLoading(true);
         try {
             const apiKey = getApiKey();
-            const headers = apiKey ? { "X-API-Key": apiKey } : {};
-            const res = await fetch(`/api/presets/${name}`, { headers });
+            const res = await fetch(
+                `/api/presets/${encodeURIComponent(name)}`,
+                {
+                    headers: apiKey ? { "X-API-Key": apiKey } : {},
+                },
+            );
             if (res.ok) {
                 const data = await res.json();
-                setEditingPresetName(name);
                 setEditingConfig(data.animation);
+                setEditingPresetName(name);
             } else {
-                showSnackbar?.("Failed to load preset data", "error");
+                showSnackbar("Failed to load preset data", "error");
             }
-        } catch (error) {
-            console.error(error);
-            showSnackbar?.("Error loading preset data", "error");
+        } catch (e) {
+            showSnackbar(`Error fetching preset: ${e.message}`, "error");
         } finally {
             setLoading(false);
         }
@@ -164,29 +187,32 @@ export default function PresetsManager({
         setLoading(true);
         try {
             const apiKey = getApiKey();
-            const headers = apiKey
-                ? { "X-API-Key": apiKey, "Content-Type": "application/json" }
-                : {};
-            const res = await fetch(`/api/presets/${editingPresetName}`, {
-                method: "POST",
-                headers,
-                body: JSON.stringify(editingConfig),
-            });
+            const res = await fetch(
+                `/api/presets/${encodeURIComponent(editingPresetName)}`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        ...(apiKey && { "X-API-Key": apiKey }),
+                    },
+                    body: JSON.stringify(editingConfig),
+                },
+            );
+
             if (res.ok) {
-                showSnackbar?.(
-                    `Preset '${editingPresetName}' updated`,
-                    "success",
-                );
                 setEditingPresetName(null);
                 setEditingConfig(null);
-                onPresetsChanged?.();
+                showSnackbar("Preset updated successfully!", "success");
+                onPresetsChanged();
             } else {
                 const err = await res.json();
-                showSnackbar?.(`Failed to update: ${err.detail}`, "error");
+                showSnackbar(
+                    `Error updating preset: ${err.detail || res.statusText}`,
+                    "error",
+                );
             }
-        } catch (error) {
-            console.error(error);
-            showSnackbar?.("Error updating preset", "error");
+        } catch (e) {
+            showSnackbar(`Error updating preset: ${e.message}`, "error");
         } finally {
             setLoading(false);
         }
@@ -196,52 +222,60 @@ export default function PresetsManager({
         setLoading(true);
         try {
             const apiKey = getApiKey();
-            const headers = apiKey
-                ? { "X-API-Key": apiKey, "Content-Type": "application/json" }
-                : {};
-            const res = await fetch(`/api/presets/${name}/load`, {
-                method: "POST",
-                headers,
-            });
+            const res = await fetch(
+                `/api/presets/${encodeURIComponent(name)}/load`,
+                {
+                    method: "POST",
+                    headers: apiKey ? { "X-API-Key": apiKey } : {},
+                },
+            );
+
             if (res.ok) {
-                showSnackbar?.(`Preset '${name}' loaded`, "success");
-                onPresetLoaded?.();
+                showSnackbar(`Preset "${name}" loaded!`, "success");
+                onPresetLoaded();
             } else {
                 const err = await res.json();
-                showSnackbar?.(`Failed to load: ${err.detail}`, "error");
+                showSnackbar(
+                    `Error loading preset: ${err.detail || res.statusText}`,
+                    "error",
+                );
             }
-        } catch (error) {
-            console.error(error);
-            showSnackbar?.("Error loading preset", "error");
+        } catch (e) {
+            showSnackbar(`Error loading preset: ${e.message}`, "error");
         } finally {
             setLoading(false);
         }
     };
 
     const handleDeletePreset = async (name) => {
-        if (!confirm(`Delete preset "${name}"?`)) return;
+        if (!confirm(`Are you sure you want to delete preset "${name}"?`))
+            return;
+
+        setLoading(true);
         try {
             const apiKey = getApiKey();
-            const headers = apiKey
-                ? { "X-API-Key": apiKey, "Content-Type": "application/json" }
-                : {};
-            const res = await fetch(`/api/presets/${name}`, {
-                method: "DELETE",
-                headers,
-            });
+            const res = await fetch(
+                `/api/presets/${encodeURIComponent(name)}`,
+                {
+                    method: "DELETE",
+                    headers: apiKey ? { "X-API-Key": apiKey } : {},
+                },
+            );
+
             if (res.ok) {
-                showSnackbar?.("Preset deleted", "success");
-                onPresetsChanged?.();
+                showSnackbar("Preset deleted.", "success");
+                onPresetsChanged();
             } else {
                 const err = await res.json();
-                showSnackbar?.(
-                    `Failed to delete preset: ${err.detail}`,
+                showSnackbar(
+                    `Error deleting preset: ${err.detail || res.statusText}`,
                     "error",
                 );
             }
-        } catch (error) {
-            console.error(error);
-            showSnackbar?.("Error deleting preset", "error");
+        } catch (e) {
+            showSnackbar(`Error deleting preset: ${e.message}`, "error");
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -251,8 +285,8 @@ export default function PresetsManager({
     };
 
     const handlePerformRename = async () => {
-        if (!renamingPresetName || !newRenamedName.trim()) return;
-        if (renamingPresetName === newRenamedName.trim()) {
+        const cleanedNewName = newRenamedName.trim();
+        if (!cleanedNewName || cleanedNewName === renamingPresetName) {
             setRenamingPresetName(null);
             return;
         }
@@ -260,28 +294,27 @@ export default function PresetsManager({
         setLoading(true);
         try {
             const apiKey = getApiKey();
-            const headers = apiKey ? { "X-API-Key": apiKey } : {};
             const res = await fetch(
-                `/api/presets/${renamingPresetName}/rename?new_name=${encodeURIComponent(
-                    newRenamedName.trim(),
-                )}`,
+                `/api/presets/${encodeURIComponent(renamingPresetName)}/rename?new_name=${encodeURIComponent(cleanedNewName)}`,
                 {
                     method: "POST",
-                    headers,
+                    headers: apiKey ? { "X-API-Key": apiKey } : {},
                 },
             );
 
             if (res.ok) {
-                showSnackbar?.("Preset renamed", "success");
                 setRenamingPresetName(null);
-                onPresetsChanged?.();
+                onPresetsChanged();
+                showSnackbar("Preset renamed.", "success");
             } else {
                 const err = await res.json();
-                showSnackbar?.(`Failed to rename: ${err.detail}`, "error");
+                showSnackbar(
+                    `Error renaming preset: ${err.detail || res.statusText}`,
+                    "error",
+                );
             }
-        } catch (error) {
-            console.error(error);
-            showSnackbar?.("Error renaming preset", "error");
+        } catch (e) {
+            showSnackbar(`Error renaming preset: ${e.message}`, "error");
         } finally {
             setLoading(false);
         }
@@ -289,11 +322,7 @@ export default function PresetsManager({
 
     return (
         <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl p-8 border border-white/5 shadow-xl">
-            <h3 className="text-xs uppercase tracking-widest font-black mb-8 text-teal-500 flex items-center gap-3">
-                <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.8)]"></span>
-                Archive
-            </h3>
-            <div className="flex gap-3 mb-8">
+            <div className="flex flex-col sm:flex-row gap-3 mb-8">
                 <input
                     type="text"
                     value={newPresetName}
@@ -311,15 +340,14 @@ export default function PresetsManager({
                     type="button"
                     onClick={handleSavePreset}
                     disabled={loading || !newPresetName.trim()}
-                    className="bg-teal-600 text-white px-6 py-2.5 rounded-xl hover:bg-teal-500 disabled:opacity-50 flex items-center gap-2 transition-all transform active:scale-95 shadow-lg shadow-teal-900/20 font-bold text-sm"
+                    className="bg-teal-600 text-white px-6 py-2.5 rounded-xl hover:bg-teal-500 disabled:opacity-50 flex items-center justify-center gap-2 transition-all transform active:scale-95 shadow-lg shadow-teal-900/20 font-bold text-sm whitespace-nowrap"
                 >
                     <PlusIcon className="w-5 h-5" />
-                    Save
+                    Save Current
                 </button>
             </div>
 
-            {/* Preset List */}
-            <div className="space-y-2 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+            <div className="space-y-2 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
                 {presets.length === 0 ? (
                     <p className="text-gray-600 text-center py-8 text-sm italic">
                         No presets archived yet.
@@ -357,7 +385,7 @@ export default function PresetsManager({
                                     onClick={() => handleEditPreset(name)}
                                     disabled={loading}
                                     className="p-2 text-blue-500 hover:bg-blue-500/10 rounded-lg transition-all"
-                                    title="Edit Preset Config"
+                                    title="Edit Preset"
                                 >
                                     <EditIcon className="w-5 h-5" />
                                 </button>
@@ -377,127 +405,133 @@ export default function PresetsManager({
             </div>
 
             {/* Edit Modal */}
-            {editingPresetName && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-md">
-                    <div className="bg-gray-950 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col border border-white/5 overflow-hidden animate-in fade-in zoom-in duration-300">
-                        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-gray-900/50 backdrop-blur-xl">
-                            <h3 className="text-lg font-black text-white flex items-center gap-3">
-                                <EditIcon className="w-5 h-5 text-blue-500" />
-                                <span className="opacity-50 uppercase tracking-widest text-[10px]">
-                                    Edit
-                                </span>
-                                <span className="text-teal-500">
-                                    {editingPresetName}
-                                </span>
-                            </h3>
-                            <button
-                                onClick={() => {
-                                    setEditingPresetName(null);
-                                    setEditingConfig(null);
-                                }}
-                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gray-400 hover:text-white transition-colors"
-                            >
-                                ✕
-                            </button>
+            {editingPresetName &&
+                mounted &&
+                createPortal(
+                    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4 backdrop-blur-xl animate-in fade-in duration-300">
+                        <div className="bg-gray-950 rounded-3xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col border border-white/10 overflow-hidden animate-in zoom-in duration-300">
+                            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-gray-900/80 backdrop-blur-xl">
+                                <h3 className="text-lg font-black text-white flex items-center gap-3">
+                                    <EditIcon className="w-5 h-5 text-blue-500" />
+                                    <span className="opacity-50 uppercase tracking-widest text-[10px]">
+                                        Edit
+                                    </span>
+                                    <span className="text-teal-500">
+                                        {editingPresetName}
+                                    </span>
+                                </h3>
+                                <button
+                                    onClick={() => {
+                                        setEditingPresetName(null);
+                                        setEditingConfig(null);
+                                    }}
+                                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gray-400 hover:text-white transition-colors"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <div className="p-8 overflow-y-auto flex-1 bg-gray-950/50">
+                                <AnimationEditor
+                                    config={editingConfig}
+                                    onChange={(newConfig) =>
+                                        setEditingConfig(newConfig)
+                                    }
+                                    allAnimations={animations}
+                                    availableAnimations={animations}
+                                    presets={presets}
+                                    isRoot={true}
+                                />
+                            </div>
+                            <div className="p-6 border-t border-white/10 flex justify-end gap-3 bg-gray-900/80 backdrop-blur-xl">
+                                <button
+                                    onClick={() => {
+                                        setEditingPresetName(null);
+                                        setEditingConfig(null);
+                                    }}
+                                    className="px-6 py-2 bg-black/40 text-gray-400 rounded-xl hover:text-white transition-all font-bold text-xs"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleSaveEditedPreset}
+                                    disabled={loading}
+                                    className="px-8 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-500 disabled:opacity-50 transition-all shadow-lg shadow-teal-900/20 font-bold text-xs"
+                                >
+                                    {loading ? "Saving..." : "Apply Changes"}
+                                </button>
+                            </div>
                         </div>
-                        <div className="p-8 overflow-y-auto flex-1 bg-gray-950/50">
-                            <AnimationEditor
-                                config={editingConfig}
-                                onChange={(newConfig) =>
-                                    setEditingConfig(newConfig)
-                                }
-                                allAnimations={animations}
-                                availableAnimations={animations}
-                                presets={presets}
-                                isRoot={true}
-                            />
-                        </div>
-                        <div className="p-6 border-t border-white/5 flex justify-end gap-3 bg-gray-900/50 backdrop-blur-xl">
-                            <button
-                                onClick={() => {
-                                    setEditingPresetName(null);
-                                    setEditingConfig(null);
-                                }}
-                                className="px-6 py-2 bg-black/40 text-gray-400 rounded-xl hover:text-white transition-all font-bold text-xs"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handleSaveEditedPreset}
-                                disabled={loading}
-                                className="px-8 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-500 disabled:opacity-50 transition-all shadow-lg shadow-teal-900/20 font-bold text-xs"
-                            >
-                                {loading ? "Saving..." : "Apply Changes"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                    </div>,
+                    document.body,
+                )}
 
             {/* Rename Modal */}
-            {renamingPresetName && (
-                <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-md">
-                    <div className="bg-gray-950 rounded-2xl shadow-2xl w-full max-w-md border border-white/5 overflow-hidden animate-in fade-in zoom-in duration-300">
-                        <div className="p-6 border-b border-white/5 flex justify-between items-center bg-gray-900/50 backdrop-blur-xl">
-                            <h3 className="text-lg font-black text-white flex items-center gap-3">
-                                <RenameIcon className="w-5 h-5 text-yellow-500" />
-                                <span className="uppercase tracking-widest text-[10px]">
-                                    Rename
-                                </span>
-                            </h3>
-                            <button
-                                onClick={() => setRenamingPresetName(null)}
-                                className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gray-400 hover:text-white transition-colors"
-                            >
-                                ✕
-                            </button>
-                        </div>
-                        <div className="p-8">
-                            <label className="block text-gray-500 text-[10px] uppercase tracking-widest font-black mb-3 ml-1">
-                                New Name
-                            </label>
-                            <input
-                                type="text"
-                                value={newRenamedName}
-                                onChange={(e) =>
-                                    setNewRenamedName(e.target.value)
-                                }
-                                onKeyDown={(e) => {
-                                    if (e.key === "Enter") {
-                                        e.preventDefault();
-                                        handlePerformRename();
+            {renamingPresetName &&
+                mounted &&
+                createPortal(
+                    <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-[100] p-4 backdrop-blur-xl animate-in fade-in duration-300">
+                        <div className="bg-gray-950 rounded-3xl shadow-2xl w-full max-w-md border border-white/10 overflow-hidden animate-in zoom-in duration-300">
+                            <div className="p-6 border-b border-white/10 flex justify-between items-center bg-gray-900/80 backdrop-blur-xl">
+                                <h3 className="text-lg font-black text-white flex items-center gap-3">
+                                    <RenameIcon className="w-5 h-5 text-yellow-500" />
+                                    <span className="uppercase tracking-widest text-[10px]">
+                                        Rename
+                                    </span>
+                                </h3>
+                                <button
+                                    onClick={() => setRenamingPresetName(null)}
+                                    className="w-8 h-8 flex items-center justify-center rounded-lg bg-white/5 text-gray-400 hover:text-white transition-colors"
+                                >
+                                    ✕
+                                </button>
+                            </div>
+                            <div className="p-8">
+                                <label className="block text-gray-500 text-[10px] uppercase tracking-widest font-black mb-3 ml-1">
+                                    New Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={newRenamedName}
+                                    onChange={(e) =>
+                                        setNewRenamedName(e.target.value)
                                     }
-                                }}
-                                className="w-full px-4 py-3 bg-black/30 border border-white/5 rounded-xl focus:outline-none focus:border-teal-500/50 text-white transition-all hover:bg-black/50 shadow-inner"
-                                autoFocus
-                            />
-                            <p className="text-[10px] text-gray-600 mt-4 leading-relaxed italic">
-                                Allowed characters: letters, numbers, spaces,
-                                hyphens, underscores.
-                            </p>
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Enter") {
+                                            e.preventDefault();
+                                            handlePerformRename();
+                                        }
+                                    }}
+                                    className="w-full px-4 py-3 bg-black/30 border border-white/5 rounded-xl focus:outline-none focus:border-teal-500/50 text-white transition-all hover:bg-black/50 shadow-inner"
+                                    autoFocus
+                                />
+                                <p className="text-[10px] text-gray-600 mt-4 leading-relaxed italic">
+                                    Allowed characters: letters, numbers,
+                                    spaces, hyphens, underscores.
+                                </p>
+                            </div>
+                            <div className="p-6 border-t border-white/10 flex justify-end gap-3 bg-gray-900/80 backdrop-blur-xl">
+                                <button
+                                    onClick={() => setRenamingPresetName(null)}
+                                    className="px-6 py-2 bg-black/40 text-gray-400 rounded-xl hover:text-white transition-all font-bold text-xs"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handlePerformRename}
+                                    disabled={
+                                        loading ||
+                                        !newRenamedName.trim() ||
+                                        newRenamedName === renamingPresetName
+                                    }
+                                    className="px-8 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-500 disabled:opacity-50 transition-all shadow-lg shadow-teal-900/20 font-bold text-xs"
+                                >
+                                    {loading ? "Updating..." : "Confirm"}
+                                </button>
+                            </div>
                         </div>
-                        <div className="p-6 border-t border-white/5 flex justify-end gap-3 bg-gray-900/50 backdrop-blur-xl">
-                            <button
-                                onClick={() => setRenamingPresetName(null)}
-                                className="px-6 py-2 bg-black/40 text-gray-400 rounded-xl hover:text-white transition-all font-bold text-xs"
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                onClick={handlePerformRename}
-                                disabled={
-                                    loading ||
-                                    !newRenamedName.trim() ||
-                                    newRenamedName === renamingPresetName
-                                }
-                                className="px-8 py-2 bg-teal-600 text-white rounded-xl hover:bg-teal-500 disabled:opacity-50 transition-all shadow-lg shadow-teal-900/20 font-bold text-xs"
-                            >
-                                {loading ? "Updating..." : "Confirm"}
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
+                    </div>,
+                    document.body,
+                )}
         </div>
     );
 }

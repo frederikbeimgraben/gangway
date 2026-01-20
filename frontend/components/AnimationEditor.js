@@ -76,14 +76,14 @@ export default function AnimationEditor({
 
     return (
         <div
-            className={`space-y-6 ${!isRoot ? "border-l border-white/10 pl-6 mt-4 ml-2" : ""}`}
+            className={`space-y-6 ${!isRoot ? "border-l border-white/10 pl-4 mt-4 ml-2" : ""}`}
         >
             {/* Animation Selector Dropdown */}
             <div className="relative group/select">
                 <select
                     value={selectedAnimName}
                     onChange={(e) => handleNameChange(e.target.value)}
-                    className={`${isDeletable ? "w-[calc(100%-3.5rem)]" : "w-full"} bg-black/40 border border-white/5 text-white rounded-xl px-4 py-3 outline-none text-sm transition-all focus:border-teal-500/50 focus:bg-black/60 shadow-xl cursor-pointer`}
+                    className={`${isDeletable ? "w-[calc(100%-3.5rem)]" : "w-full"} bg-black/40 border border-white/5 text-white rounded-xl pl-4 pr-10 py-3 outline-none text-sm transition-all focus:border-teal-500/50 focus:bg-black/60 shadow-xl cursor-pointer appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.5em_1.5em] bg-[right_0.75rem_center] bg-no-repeat`}
                 >
                     <option value="" disabled>
                         Select Animation
@@ -181,7 +181,7 @@ const ColorInputs = ({ value: colorValue, onChange: onColorChange }) => {
 
     return (
         <div className="flex items-center gap-3 w-full">
-            <div className="relative w-10 h-10 shrink-0 group/picker">
+            <div className="relative w-12 h-12 shrink-0 group/picker">
                 <input
                     type="color"
                     value={rgbToHex(c.r, c.g, c.b)}
@@ -223,7 +223,7 @@ const ColorInputs = ({ value: colorValue, onChange: onColorChange }) => {
                                 }
                                 onColorChange({ ...c, [chan]: numVal });
                             }}
-                            className={`w-full bg-black/40 border rounded-lg px-0.5 py-1.5 text-center text-[11px] font-bold text-gray-200 outline-none transition-all focus:shadow-[0_0_10px_rgba(255,255,255,0.05)] ${channelColors[chan]}`}
+                            className={`w-full bg-black/40 border rounded-lg px-0.5 py-1.5 text-center text-[11px] font-bold text-gray-200 outline-none transition-all focus:shadow-[0_0_10px_rgba(255,255,255,0.05)] [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${channelColors[chan]}`}
                         />
                     </div>
                 ))}
@@ -303,7 +303,7 @@ function ParamInput({
                 {list.map((item, idx) => (
                     <div
                         key={idx}
-                        className="bg-white/[0.02] border border-white/5 rounded-2xl relative py-3 group/item overflow-hidden shadow-sm"
+                        className="rounded-2xl relative py-3 group/item overflow-hidden shadow-sm"
                     >
                         <button
                             type="button"
@@ -375,19 +375,19 @@ function ParamInput({
                         return (
                             <div
                                 key={idx}
-                                className="bg-white/[0.02] border border-white/5 rounded-2xl relative p-6 pt-10 space-y-6 group/item shadow-sm"
+                                className="border-l border-white/10 ml-1 mt-1 pl-4 relative py-3 group/item shadow-sm"
                             >
                                 <button
                                     type="button"
                                     onClick={() => removeItem(idx)}
-                                    className="absolute top-4 right-4 text-red-400/50 hover:text-red-400 transition-colors p-2 hover:bg-red-400/10 rounded-lg z-10"
+                                    className="absolute top-9 right-2 text-red-400/50 hover:text-red-400 transition-colors p-2 hover:bg-red-400/10 rounded-lg z-10"
                                     aria-label="Remove"
                                     title="Remove"
                                 >
                                     <Trash2 size={16} />
                                 </button>
 
-                                <div className="flex flex-col gap-1">
+                                <div className="flex flex-col gap-1 mr-11">
                                     <label className="text-gray-400 text-xs uppercase font-bold tracking-wider">
                                         Strip Index
                                     </label>
@@ -406,7 +406,7 @@ function ParamInput({
                                     />
                                 </div>
 
-                                <div className="flex flex-col gap-1">
+                                <div className="flex flex-col gap-1 mt-4">
                                     <label className="text-gray-400 text-xs uppercase font-bold tracking-wider">
                                         Animation
                                     </label>
@@ -460,14 +460,16 @@ function ParamInput({
                 onChange(list.filter((_, i) => i !== idx));
 
             return (
-                <div className="space-y-2 w-[calc(100%-2.5rem)]">
+                <div className="space-y-2 w-full">
                     {list.map((item, idx) => (
                         <div key={idx} className="flex gap-2 items-center">
                             <div className="flex-1">
-                                <ColorInputs
-                                    value={item}
-                                    onChange={(val) => updateItem(idx, val)}
-                                />
+                                <div className="bg-black/20 p-4 rounded-xl border border-white/5">
+                                    <ColorInputs
+                                        value={item}
+                                        onChange={(val) => updateItem(idx, val)}
+                                    />
+                                </div>
                             </div>
                             <button
                                 type="button"
@@ -509,7 +511,7 @@ function ParamInput({
                     {list.map((item, idx) => (
                         <div
                             key={idx}
-                            className="bg-white/[0.02] border border-white/5 rounded-2xl relative py-3 group/item overflow-hidden shadow-sm"
+                            className="rounded-2xl relative py-3 group/item overflow-hidden shadow-sm"
                         >
                             <button
                                 type="button"
@@ -581,7 +583,7 @@ function ParamInput({
                         <ColorInputs value={value} onChange={onChange} />
                     </div>
                 ) : (
-                    <div className="bg-white/[0.02] border border-white/5 rounded-2xl py-2 shadow-sm">
+                    <div className="rounded-2xl py-2 shadow-sm">
                         <AnimationEditor
                             config={value || {}}
                             onChange={onChange}
@@ -601,7 +603,7 @@ function ParamInput({
             <select
                 value={value ?? ""}
                 onChange={(e) => onChange(e.target.value)}
-                className="bg-black/30 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-gray-200 focus:border-teal-500/50 outline-none w-full transition-all hover:bg-black/50 shadow-sm"
+                className="bg-black/30 border border-white/5 rounded-xl pl-4 pr-10 py-2.5 text-sm text-gray-200 focus:border-teal-500/50 outline-none w-full transition-all hover:bg-black/50 shadow-sm appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.5em_1.5em] bg-[right_0.75rem_center] bg-no-repeat"
             >
                 <option value="" disabled>
                     Select a preset...
@@ -622,7 +624,7 @@ function ParamInput({
             <select
                 value={value}
                 onChange={(e) => onChange(e.target.value)}
-                className="bg-black/30 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-gray-200 focus:border-teal-500/50 outline-none w-full transition-all hover:bg-black/50 shadow-sm"
+                className="bg-black/30 border border-white/5 rounded-xl pl-4 pr-10 py-2.5 text-sm text-gray-200 focus:border-teal-500/50 outline-none w-full transition-all hover:bg-black/50 shadow-sm appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.5em_1.5em] bg-[right_0.75rem_center] bg-no-repeat"
             >
                 {options.map((opt) => (
                     <option key={opt} value={opt}>
@@ -635,7 +637,11 @@ function ParamInput({
 
     // Case: Single Color
     if (isColor(param.type)) {
-        return <ColorInputs value={value} onChange={onChange} />;
+        return (
+            <div className="bg-black/20 p-4 rounded-xl border border-white/5">
+                <ColorInputs value={value} onChange={onChange} />
+            </div>
+        );
     }
 
     // Case: Boolean
@@ -713,7 +719,7 @@ function ParamInput({
                 value={value ?? ""}
                 onChange={handleChange}
                 onBlur={handleBlur}
-                className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-gray-200 focus:border-teal-500/50 outline-none transition-all hover:bg-black/50 shadow-sm invalid:!border-red-500/50"
+                className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-gray-200 focus:border-teal-500/50 outline-none transition-all hover:bg-black/50 shadow-sm invalid:!border-red-500/50 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                 step={isInt ? "1" : "any"}
                 {...(param.min !== null && { min: param.min })}
                 {...(param.max !== null && { max: param.max })}

@@ -362,7 +362,7 @@ export default function Visualization({ config }) {
                 }}
             >
                 {uiStats && (
-                    <div className="absolute top-4 left-4 z-30 bg-black/60 backdrop-blur p-3 rounded-lg border border-white/10 text-[10px] font-mono text-teal-400">
+                    <div className="absolute top-4 left-4 z-20 bg-black/60 backdrop-blur p-2 md:p-3 rounded-lg border border-white/10 text-[10px] font-mono text-teal-400 pointer-events-none select-none">
                         <div className="flex justify-between gap-4">
                             <span>RPS</span>
                             <span className="text-white">{uiStats.fps}</span>
@@ -374,16 +374,13 @@ export default function Visualization({ config }) {
                     </div>
                 )}
 
-                <div className="absolute bottom-6 left-6 z-30 flex flex-col gap-1.5 hidden md:block select-none">
-                    <div className="text-[10px] text-gray-500 font-bold mb-1 tracking-widest uppercase ml-1">
-                        Infrastructure
-                    </div>
+                <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 z-20 flex flex-col gap-1 select-none pointer-events-none md:pointer-events-auto max-h-[50%] overflow-y-auto custom-scrollbar">
                     {config.strips.map((s, i) => (
                         <div
                             key={i}
                             onMouseEnter={() => setHoveredStripIndex(i)}
                             onMouseLeave={() => setHoveredStripIndex(null)}
-                            className={`px-3 py-1.5 rounded-lg transition-all flex items-center gap-3 border ${hoveredStripIndex === i ? "bg-teal-500/20 border-teal-500/50 shadow-lg scale-105" : "bg-black/20 border-transparent"}`}
+                            className={`px-2 py-1 md:px-3 md:py-1.5 rounded-lg transition-all flex items-center gap-2 md:gap-3 border pointer-events-auto ${hoveredStripIndex === i ? "bg-teal-500/20 border-teal-500/50 shadow-lg scale-105" : "bg-black/20 border-transparent"}`}
                         >
                             <div
                                 className={`w-1.5 h-1.5 rounded-full transition-all ${hoveredStripIndex === i ? "bg-white shadow-[0_0_8px_white]" : "bg-teal-600"}`}
@@ -438,7 +435,7 @@ export default function Visualization({ config }) {
                 </div>
             </div>
 
-            <div className="h-20 bg-gray-900 border-t border-white/5 flex items-center justify-center gap-8 px-8">
+            <div className="h-20 bg-gray-900 border-t border-white/5 flex items-center justify-center gap-4 md:gap-8 px-6 md:px-8">
                 <div className="flex bg-black/40 p-1 rounded-xl border border-white/5">
                     {["mapped", "raw"].map((m) => (
                         <button

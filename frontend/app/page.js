@@ -207,7 +207,13 @@ export default function Home() {
                         active={currentView === "animations"}
                         onClick={() => setCurrentView("animations")}
                     >
-                        EFFECTS
+                        ANIMATION
+                    </NavButton>
+                    <NavButton
+                        active={currentView === "presets"}
+                        onClick={() => setCurrentView("presets")}
+                    >
+                        PRESETS
                     </NavButton>
                 </nav>
             </header>
@@ -229,28 +235,6 @@ export default function Home() {
                         className={`h-full overflow-y-auto p-4 md:p-12 ${currentView === "animations" ? "block" : "hidden"}`}
                     >
                         <div className="max-w-4xl mx-auto">
-                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-10">
-                                <div>
-                                    <h2 className="text-3xl font-black text-white tracking-tight">
-                                        Configuration
-                                    </h2>
-                                    <p className="text-gray-500 text-sm mt-1">
-                                        Design and save your visual environments
-                                    </p>
-                                </div>
-                                <button
-                                    onClick={saveConfig}
-                                    disabled={saving || !isFormValid}
-                                    className={`font-bold py-2.5 px-8 rounded-xl shadow-lg transition-all transform active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
-                                        !isFormValid
-                                            ? "bg-gray-800 text-gray-600"
-                                            : "bg-teal-600 hover:bg-teal-500 text-white shadow-teal-900/20"
-                                    }`}
-                                >
-                                    {saving ? "Saving..." : "Save Changes"}
-                                </button>
-                            </div>
-
                             <form
                                 ref={formRef}
                                 onInput={handleFormChange}
@@ -258,10 +242,6 @@ export default function Home() {
                             >
                                 {/* Animation */}
                                 <div className="bg-gray-900/50 backdrop-blur-sm rounded-2xl p-8 border border-white/5 shadow-xl">
-                                    <h3 className="text-xs uppercase tracking-widest font-black mb-8 text-teal-500 flex items-center gap-3">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-teal-500 shadow-[0_0_8px_rgba(20,184,166,0.8)]"></span>
-                                        Core Engine
-                                    </h3>
                                     <AnimationEditor
                                         config={config.animation}
                                         onChange={updateAnimationConfig}
@@ -271,19 +251,59 @@ export default function Home() {
                                         isRoot={true}
                                     />
                                 </div>
-
-                                <PresetsManager
-                                    presets={presets}
-                                    animations={animations}
-                                    onPresetsChanged={fetchData}
-                                    onPresetLoaded={fetchData}
-                                    showSnackbar={showSnackbar}
-                                />
                             </form>
+                        </div>
+                    </div>
+
+                    {/* Presets View */}
+                    <div
+                        className={`h-full overflow-y-auto p-4 md:p-12 ${currentView === "presets" ? "block" : "hidden"}`}
+                    >
+                        <div className="max-w-4xl mx-auto">
+                            <PresetsManager
+                                presets={presets}
+                                animations={animations}
+                                onPresetsChanged={fetchData}
+                                onPresetLoaded={fetchData}
+                                showSnackbar={showSnackbar}
+                            />
                         </div>
                     </div>
                 </div>
             </main>
+
+            {/* Mobile Floating Save Button */}
+            <div
+                className={`fixed bottom-8 right-6 z-50 ${currentView === "viz" ? "hidden" : ""}`}
+            >
+                <button
+                    onClick={saveConfig}
+                    disabled={saving || !isFormValid}
+                    className={`w-14 h-14 rounded-2xl shadow-2xl flex items-center justify-center transition-all transform active:scale-90 disabled:opacity-50 ${
+                        !isFormValid
+                            ? "bg-gray-800 text-gray-600 border border-white/5"
+                            : "bg-teal-600 text-white shadow-teal-900/40"
+                    }`}
+                >
+                    {saving ? (
+                        <div className="animate-spin rounded-full h-6 w-6 border-2 border-white/20 border-t-white"></div>
+                    ) : (
+                        <svg
+                            className="w-6 h-6"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                        >
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" />
+                            <polyline points="17 21 17 13 7 13 7 21" />
+                            <polyline points="7 3 7 8 15 8" />
+                        </svg>
+                    )}
+                </button>
+            </div>
 
             {/* Snackbar */}
             <div
