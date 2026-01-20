@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo } from "react";
-import { Play, Users } from "lucide-react";
+import { Play, Pause, Users } from "lucide-react";
 
 const getApiKey = () => {
     if (typeof window !== "undefined") {
@@ -29,7 +29,7 @@ export default function Visualization({ config }) {
     const [imageSrc, setImageSrc] = useState("");
     const [imageDims, setImageDims] = useState({ width: 0, height: 0 });
     const [scale, setScale] = useState(1);
-    const [viewMode, setViewMode] = useState("mapped");
+    const [viewMode, setViewMode] = useState("raw");
     const [showImage, setShowImage] = useState(false);
     const [showObjects, setShowObjects] = useState(true);
     const [homography, setHomography] = useState(null);
@@ -400,7 +400,7 @@ export default function Visualization({ config }) {
                     </div>
                 )}
 
-                <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 z-20 flex flex-col gap-1 select-none pointer-events-none md:pointer-events-auto max-h-[50%] overflow-y-auto overflow-x-hidden custom-scrollbar">
+                <div className="absolute p-2 bottom-4 left-4 md:bottom-6 md:left-6 z-20 flex flex-col gap-1 select-none pointer-events-none md:pointer-events-auto max-h-[50%] overflow-y-auto overflow-x-hidden custom-scrollbar">
                     {config.strips.map((s, i) => (
                         <div
                             key={i}
@@ -484,7 +484,9 @@ export default function Visualization({ config }) {
                     <ToggleButton
                         active={showImage}
                         onClick={() => setShowImage(!showImage)}
-                        icon={<Play size={20} />}
+                        icon={
+                            showImage ? <Pause size={20} /> : <Play size={20} />
+                        }
                         label="Live"
                     />
                     <ToggleButton

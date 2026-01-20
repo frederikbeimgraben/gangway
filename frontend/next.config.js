@@ -1,3 +1,5 @@
+const runtimeCaching = require("next-pwa/cache");
+
 const withPWA = require("next-pwa")({
     dest: "public",
     register: true,
@@ -10,6 +12,8 @@ const withPWA = require("next-pwa")({
     reloadOnOnline: true,
     cacheStartUrl: true,
     dynamicStartUrl: true,
+    buildExcludes: [/middleware-manifest\.json$/],
+    runtimeCaching,
 });
 
 /** @type {import('next').NextConfig} */

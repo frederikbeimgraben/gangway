@@ -20,9 +20,9 @@ export const metadata = {
         shortcut: "/favicon.ico",
         apple: "/icons/apple-touch-icon.png",
         icon: [
-            { url: "/favicon.png" },
+            { url: "/favicon.svg", type: "image/svg+xml" },
+            { url: "/favicon.png", type: "image/png" },
             { url: "/favicon.ico" },
-            { url: "/favicon.svg" },
         ],
     },
     manifest: "/manifest.json",
@@ -30,8 +30,11 @@ export const metadata = {
 
 export const viewport = {
     themeColor: "#000000",
-    viewport:
-        "width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover",
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: "cover",
 };
 
 export default function RootLayout({ children }) {
