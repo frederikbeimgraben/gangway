@@ -308,7 +308,7 @@ function ParamInput({
                         <button
                             type="button"
                             onClick={() => removeItem(idx)}
-                            className="absolute top-4 right-4 text-red-400/50 hover:text-red-400 transition-colors p-2 hover:bg-red-400/10 rounded-lg z-10"
+                            className="absolute top-8 right-4 text-red-400/50 hover:text-red-400 transition-colors p-2 hover:bg-red-400/10 rounded-lg z-10"
                             aria-label="Remove"
                             title="Remove"
                         >
@@ -516,7 +516,7 @@ function ParamInput({
                             <button
                                 type="button"
                                 onClick={() => removeItem(idx)}
-                                className="absolute top-4 right-4 text-red-400/50 hover:text-red-400 transition-colors p-2 hover:bg-red-400/10 rounded-lg z-10"
+                                className="absolute top-8 right-4 text-red-400/50 hover:text-red-400 transition-colors p-2 hover:bg-red-400/10 rounded-lg z-10"
                                 aria-label="Remove"
                                 title="Remove"
                             >

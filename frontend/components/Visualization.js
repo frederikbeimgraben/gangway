@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo } from "react";
+import { Camera, Users } from "lucide-react";
 
 const getApiKey = () => {
     if (typeof window !== "undefined") {
@@ -23,11 +24,13 @@ export default function Visualization({ config }) {
     // State for UI triggers
     const [uiStats, setUiStats] = useState(null);
     const [hoveredStripIndex, setHoveredStripIndex] = useState(null);
+    const hasFetchedOnceRef = useRef(false);
+    const lastObjectURLRef = useRef(null);
     const [imageSrc, setImageSrc] = useState("");
     const [imageDims, setImageDims] = useState({ width: 0, height: 0 });
     const [scale, setScale] = useState(1);
     const [viewMode, setViewMode] = useState("mapped");
-    const [showImage, setShowImage] = useState(true);
+    const [showImage, setShowImage] = useState(false);
     const [showObjects, setShowObjects] = useState(true);
     const [homography, setHomography] = useState(null);
 
@@ -100,12 +103,17 @@ export default function Visualization({ config }) {
     useEffect(() => {
         let active = true;
         let timeoutId;
-        let objectUrl = null;
+        let isFetching = false;
+        hasFetchedOnceRef.current = false;
 
         const loadNext = async () => {
             if (!active) return;
-            if (!showImage) {
-                timeoutId = setTimeout(loadNext, 500);
+            if (isFetching) {
+                timeoutId = setTimeout(loadNext, 200);
+                return;
+            }
+            if (!showImage && hasFetchedOnceRef.current) {
+                timeoutId = setTimeout(loadNext, 1000);
                 return;
             }
             const apiKey = getApiKey();
@@ -114,38 +122,56 @@ export default function Visualization({ config }) {
                     ? "/api/visualization/live_mapped"
                     : "/api/visualization/live";
             try {
+                isFetching = true;
                 const res = await fetch(url, {
                     headers: apiKey ? { "X-API-Key": apiKey } : {},
                 });
                 if (res.ok && active) {
                     const blob = await res.blob();
                     const nextUrl = URL.createObjectURL(blob);
-                    const img = new Image();
-                    img.onload = () => {
-                        if (!active) {
-                            URL.revokeObjectURL(nextUrl);
-                            return;
-                        }
-                        setImageDims({
-                            width: img.naturalWidth,
-                            height: img.naturalHeight,
-                        });
-                        if (objectUrl) URL.revokeObjectURL(objectUrl);
-                        objectUrl = nextUrl;
-                        setImageSrc(nextUrl);
-                    };
-                    img.src = nextUrl;
+                    await new Promise((resolve) => {
+                        const img = new Image();
+                        img.onload = () => {
+                            if (active) {
+                                setImageDims({
+                                    width: img.naturalWidth,
+                                    height: img.naturalHeight,
+                                });
+                                if (lastObjectURLRef.current)
+                                    URL.revokeObjectURL(
+                                        lastObjectURLRef.current,
+                                    );
+                                lastObjectURLRef.current = nextUrl;
+                                setImageSrc(nextUrl);
+                                hasFetchedOnceRef.current = true;
+                            } else {
+                                URL.revokeObjectURL(nextUrl);
+                            }
+                            resolve();
+                        };
+                        img.onerror = resolve;
+                        img.src = nextUrl;
+                    });
                 }
-            } catch (e) {}
+            } catch (e) {
+            } finally {
+                isFetching = false;
+            }
             if (active) timeoutId = setTimeout(loadNext, 200);
         };
         loadNext();
         return () => {
             active = false;
             clearTimeout(timeoutId);
-            if (objectUrl) URL.revokeObjectURL(objectUrl);
         };
     }, [showImage, viewMode]);
+
+    useEffect(() => {
+        return () => {
+            if (lastObjectURLRef.current)
+                URL.revokeObjectURL(lastObjectURLRef.current);
+        };
+    }, []);
 
     const invH = useMemo(() => {
         if (!homography) return null;
@@ -374,7 +400,7 @@ export default function Visualization({ config }) {
                     </div>
                 )}
 
-                <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 z-20 flex flex-col gap-1 select-none pointer-events-none md:pointer-events-auto max-h-[50%] overflow-y-auto custom-scrollbar">
+                <div className="absolute bottom-4 left-4 md:bottom-6 md:left-6 z-20 flex flex-col gap-1 select-none pointer-events-none md:pointer-events-auto max-h-[50%] overflow-y-auto overflow-x-hidden custom-scrollbar">
                     {config.strips.map((s, i) => (
                         <div
                             key={i}
@@ -415,7 +441,13 @@ export default function Visualization({ config }) {
                     {imageSrc && (
                         <img
                             src={imageSrc}
-                            className={`absolute inset-0 w-full h-full transition-opacity duration-700 ${showImage ? (viewMode === "raw" ? "opacity-100" : "opacity-30") : "opacity-0"} ${viewMode === "raw" ? "object-contain" : "object-cover"}`}
+                            className={`absolute inset-0 w-full h-full transition-opacity duration-700 ${
+                                viewMode === "raw"
+                                    ? showImage
+                                        ? "opacity-100"
+                                        : "opacity-40"
+                                    : "opacity-30"
+                            } ${viewMode === "raw" ? "object-contain" : "object-cover"}`}
                         />
                     )}
                     <canvas
@@ -452,11 +484,13 @@ export default function Visualization({ config }) {
                     <ToggleButton
                         active={showImage}
                         onClick={() => setShowImage(!showImage)}
+                        icon={<Camera size={20} />}
                         label="Live"
                     />
                     <ToggleButton
                         active={showObjects}
                         onClick={() => setShowObjects(!showObjects)}
+                        icon={<Users size={20} />}
                         label="People"
                     />
                 </div>
@@ -465,13 +499,14 @@ export default function Visualization({ config }) {
     );
 }
 
-function ToggleButton({ active, onClick, label }) {
+function ToggleButton({ active, onClick, icon, label }) {
     return (
         <button
             onClick={onClick}
-            className={`px-5 py-2 rounded-xl border text-xs font-bold transition-all ${active ? "bg-teal-900/30 border-teal-500 text-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.1)]" : "bg-black/20 border-white/5 text-gray-500 hover:border-white/10"}`}
+            title={label}
+            className={`px-4 py-2 rounded-xl border transition-all flex items-center justify-center ${active ? "bg-teal-900/30 border-teal-500 text-teal-400 shadow-[0_0_10px_rgba(20,184,166,0.1)]" : "bg-black/20 border-white/5 text-gray-500 hover:border-white/10"}`}
         >
-            {label}
+            {icon}
         </button>
     );
 }
