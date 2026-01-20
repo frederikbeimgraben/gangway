@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useMemo } from "react";
-import { Camera, Users } from "lucide-react";
+import { Play, Users } from "lucide-react";
 
 const getApiKey = () => {
     if (typeof window !== "undefined") {
@@ -484,7 +484,7 @@ export default function Visualization({ config }) {
                     <ToggleButton
                         active={showImage}
                         onClick={() => setShowImage(!showImage)}
-                        icon={<Camera size={20} />}
+                        icon={<Play size={20} />}
                         label="Live"
                     />
                     <ToggleButton

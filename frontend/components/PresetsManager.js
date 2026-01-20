@@ -96,6 +96,7 @@ export default function PresetsManager({
     onPresetsChanged,
     onPresetLoaded,
     showSnackbar,
+    fullConfig = null,
 }) {
     const [newPresetName, setNewPresetName] = useState("");
     const [loading, setLoading] = useState(false);
@@ -440,6 +441,7 @@ export default function PresetsManager({
                                     availableAnimations={animations}
                                     presets={presets}
                                     isRoot={true}
+                                    fullConfig={fullConfig}
                                 />
                             </div>
                             <div className="p-6 border-t border-white/10 flex justify-end gap-3 bg-gray-900/80 backdrop-blur-xl">

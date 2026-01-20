@@ -14,6 +14,7 @@ export default function AnimationEditor({
     presets = [],
     isRoot = false, // Flag to indicate if this is a top-level editor
     isDeletable = false,
+    fullConfig = null,
 }) {
     const [selectedAnimName, setSelectedAnimName] = useState("");
     const [params, setParams] = useState({});
@@ -118,6 +119,7 @@ export default function AnimationEditor({
                                 }
                                 allAnimations={allAnimations}
                                 presets={presets}
+                                fullConfig={fullConfig}
                             />
                         </div>
                     ))}
@@ -239,6 +241,7 @@ function ParamInput({
     allAnimations,
     presets,
     animName,
+    fullConfig = null,
 }) {
     // --- Type Parsing Helpers ---
     // These functions inspect the detailed type object from the backend API.
@@ -320,6 +323,7 @@ function ParamInput({
                             availableAnimations={childAnims}
                             allAnimations={allAnimations}
                             isDeletable={true}
+                            fullConfig={fullConfig}
                         />
                     </div>
                 ))}
@@ -403,6 +407,7 @@ function ParamInput({
                                         allAnimations={allAnimations}
                                         presets={presets}
                                         animName="strip_assignment"
+                                        fullConfig={fullConfig}
                                     />
                                 </div>
 
@@ -431,6 +436,7 @@ function ParamInput({
                                         allAnimations={allAnimations}
                                         presets={presets}
                                         animName="strip_assignment"
+                                        fullConfig={fullConfig}
                                     />
                                 </div>
                             </div>
@@ -528,6 +534,7 @@ function ParamInput({
                                 availableAnimations={childAnims}
                                 allAnimations={allAnimations}
                                 isDeletable={true}
+                                fullConfig={fullConfig}
                             />
                         </div>
                     ))}
@@ -590,6 +597,7 @@ function ParamInput({
                             availableAnimations={childAnims}
                             allAnimations={allAnimations}
                             presets={presets}
+                            fullConfig={fullConfig}
                         />
                     </div>
                 )}
@@ -673,6 +681,27 @@ function ParamInput({
                 onChange={(e) => onChange(e.target.value)}
                 className="w-full bg-black/30 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-gray-200 focus:border-teal-500/50 outline-none transition-all [color-scheme:dark] hover:bg-black/50 shadow-sm"
             />
+        );
+    }
+
+    // Case: Strip Index (Dropdown)
+    if (
+        (param.name === "strip" || param.name === "strip_index") &&
+        param.type.name === "int" &&
+        fullConfig?.strips
+    ) {
+        return (
+            <select
+                value={value ?? 0}
+                onChange={(e) => onChange(parseInt(e.target.value, 10))}
+                className="bg-black/30 border border-white/5 rounded-xl pl-4 pr-10 py-2.5 text-sm text-gray-200 focus:border-teal-500/50 outline-none w-full transition-all hover:bg-black/50 shadow-sm appearance-none bg-[url('data:image/svg+xml;charset=utf-8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20fill%3D%22none%22%20viewBox%3D%220%200%2020%2020%22%3E%3Cpath%20stroke%3D%22%236b7280%22%20stroke-linecap%3D%22round%22%20stroke-linejoin%3D%22round%22%20stroke-width%3D%221.5%22%20d%3D%22m6%208%204%204%204-4%22%2F%3E%3C%2Fsvg%3E')] bg-[length:1.5em_1.5em] bg-[right_0.75rem_center] bg-no-repeat"
+            >
+                {fullConfig.strips.map((s, i) => (
+                    <option key={i} value={i}>
+                        Strip {i + 1} ({s.index})
+                    </option>
+                ))}
+            </select>
         );
     }
 

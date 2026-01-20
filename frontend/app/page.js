@@ -249,6 +249,7 @@ export default function Home() {
                                         availableAnimations={animations}
                                         presets={presets}
                                         isRoot={true}
+                                        fullConfig={config}
                                     />
                                 </div>
                             </form>
@@ -266,6 +267,7 @@ export default function Home() {
                                 onPresetsChanged={fetchData}
                                 onPresetLoaded={fetchData}
                                 showSnackbar={showSnackbar}
+                                fullConfig={config}
                             />
                         </div>
                     </div>
