@@ -109,11 +109,7 @@ strips:
   - 82.5
   - 490.0
 animation:
-  extrapolate:
-    animation:
-      smooth:
-        animation:
-          preset:
-            name: Rainbow-Trails
-        smoothing: 0.5
-    latency: 0.5
+  linear_rainbow:
+    direction: y
+    speed: 0.1
+    spread: 3.0

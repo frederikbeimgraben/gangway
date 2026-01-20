@@ -27,6 +27,7 @@ export default function Visualization({ config }) {
     const hasFetchedOnceRef = useRef(false);
     const lastObjectURLRef = useRef(null);
     const [imageSrc, setImageSrc] = useState("");
+    const [imageReady, setImageReady] = useState(false);
     const [imageDims, setImageDims] = useState({ width: 0, height: 0 });
     const [scale, setScale] = useState(1);
     const [viewMode, setViewMode] = useState("raw");
@@ -143,6 +144,7 @@ export default function Visualization({ config }) {
                                     );
                                 lastObjectURLRef.current = nextUrl;
                                 setImageSrc(nextUrl);
+                                setImageReady(true);
                                 hasFetchedOnceRef.current = true;
                             } else {
                                 URL.revokeObjectURL(nextUrl);
@@ -220,6 +222,11 @@ export default function Visualization({ config }) {
 
         const render = () => {
             ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+
+            if (viewMode === "raw" && !imageReady) {
+                frameId = requestAnimationFrame(render);
+                return;
+            }
 
             // 1. Hover Logic in Floor Space
             let mx = -1000,
@@ -387,7 +394,7 @@ export default function Visualization({ config }) {
                     mousePosRef.current = { x: -1000, y: -1000 };
                 }}
             >
-                {uiStats && (
+                {uiStats && (imageReady || viewMode === "mapped") && (
                     <div className="absolute top-4 left-4 z-20 bg-black/60 backdrop-blur p-2 md:p-3 rounded-lg border border-white/10 text-[10px] font-mono text-teal-400 pointer-events-none select-none">
                         <div className="flex justify-between gap-4">
                             <span>RPS</span>
@@ -400,7 +407,9 @@ export default function Visualization({ config }) {
                     </div>
                 )}
 
-                <div className="absolute p-2 bottom-4 left-4 md:bottom-6 md:left-6 z-20 flex flex-col gap-1 select-none pointer-events-none md:pointer-events-auto max-h-[50%] overflow-y-auto overflow-x-hidden custom-scrollbar">
+                <div
+                    className={`absolute p-2 bottom-4 left-4 md:bottom-6 md:left-6 z-20 flex flex-col gap-1 select-none pointer-events-none md:pointer-events-auto max-h-[50%] overflow-y-auto overflow-x-hidden custom-scrollbar transition-opacity duration-500 ${imageReady || viewMode === "mapped" ? "opacity-100" : "opacity-0"}`}
+                >
                     {config.strips.map((s, i) => (
                         <div
                             key={i}
@@ -438,6 +447,11 @@ export default function Visualization({ config }) {
                             : { width: "100%", height: "100%" }
                     }
                 >
+                    {viewMode === "raw" && !imageReady && (
+                        <div className="absolute inset-0 flex items-center justify-center z-20">
+                            <div className="animate-spin rounded-full h-10 w-10 border-2 border-teal-500/20 border-t-teal-500"></div>
+                        </div>
+                    )}
                     {imageSrc && (
                         <img
                             src={imageSrc}
@@ -462,7 +476,7 @@ export default function Visualization({ config }) {
                                 ? imageDims.height || 720
                                 : floorHeight
                         }
-                        className={`absolute inset-0 w-full h-full z-10 pointer-events-none ${viewMode === "raw" ? "object-contain" : ""}`}
+                        className={`absolute inset-0 w-full h-full z-10 pointer-events-none transition-opacity duration-500 ${viewMode === "raw" ? "object-contain" : ""} ${imageReady || viewMode === "mapped" ? "opacity-100" : "opacity-0"}`}
                     />
                 </div>
             </div>

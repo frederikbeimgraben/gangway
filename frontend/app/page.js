@@ -5,10 +5,30 @@ import Visualization from "../components/Visualization";
 import AnimationEditor from "../components/AnimationEditor";
 import PresetsManager from "../components/PresetsManager";
 import Image from "next/image";
+import { CheckCircle2, AlertCircle } from "lucide-react";
 import AccessDenied from "./AccessDenied";
 
 export default function Home() {
     const [currentView, setCurrentView] = useState("viz");
+
+    // Sync currentView with window hash
+    useEffect(() => {
+        const handleHashChange = () => {
+            const hash = window.location.hash.replace("#", "");
+            if (["viz", "animations", "presets"].includes(hash)) {
+                setCurrentView(hash);
+            }
+        };
+
+        handleHashChange();
+        window.addEventListener("hashchange", handleHashChange);
+        return () => window.removeEventListener("hashchange", handleHashChange);
+    }, []);
+
+    const handleViewChange = (view) => {
+        setCurrentView(view);
+        window.location.hash = view;
+    };
     const [authStatus, setAuthStatus] = useState("pending"); // pending, authenticated, unauthorized
     const [config, setConfig] = useState(null);
     const [rawConfigString, setRawConfigString] = useState(""); // Still needed for save functionality, even if tab is gone
@@ -183,7 +203,7 @@ export default function Home() {
     }
 
     return (
-        <div className="flex flex-col h-screen bg-gray-950 text-gray-100 font-sans">
+        <div className="flex flex-col h-full min-h-[100svh] bg-gray-950 text-gray-100 font-sans overflow-hidden">
             {/* Header */}
             <header className="bg-gray-900/50 backdrop-blur-xl border-b border-white/5 p-4 flex flex-col md:flex-row items-center justify-between shrink-0 z-50">
                 {/* Logo */}
@@ -199,19 +219,19 @@ export default function Home() {
                 <nav className="flex gap-1 bg-black/40 p-1 rounded-xl border border-white/5 shadow-inner">
                     <NavButton
                         active={currentView === "viz"}
-                        onClick={() => setCurrentView("viz")}
+                        onClick={() => handleViewChange("viz")}
                     >
                         LIVE
                     </NavButton>
                     <NavButton
                         active={currentView === "animations"}
-                        onClick={() => setCurrentView("animations")}
+                        onClick={() => handleViewChange("animations")}
                     >
                         ANIMATION
                     </NavButton>
                     <NavButton
                         active={currentView === "presets"}
-                        onClick={() => setCurrentView("presets")}
+                        onClick={() => handleViewChange("presets")}
                     >
                         PRESETS
                     </NavButton>
@@ -221,18 +241,18 @@ export default function Home() {
             <main className="flex-1 flex flex-col md:flex-row overflow-hidden">
                 {/* Visualization View */}
                 <div
-                    className={`h-full flex-col ${currentView === "viz" ? "flex w-full md:w-full" : "hidden md:flex md:w-1/2"}`}
+                    className={`h-full flex-col overflow-y-auto overscroll-contain ${currentView === "viz" ? "flex w-full md:w-full" : "hidden md:flex md:w-1/2"}`}
                 >
                     <Visualization config={config} />
                 </div>
 
                 {/* Right Panel for other tabs */}
                 <div
-                    className={`border-l border-white/5 bg-gray-900/20 flex-1 overflow-y-auto ${currentView === "viz" ? "hidden md:hidden" : "block w-full md:block md:w-1/2"}`}
+                    className={`border-l border-white/5 bg-gray-900/20 flex-1 min-h-0 ${currentView === "viz" ? "hidden md:hidden" : "block w-full md:block md:w-1/2"}`}
                 >
                     {/* Animations View */}
                     <div
-                        className={`h-full overflow-y-auto p-4 md:p-12 ${currentView === "animations" ? "block" : "hidden"}`}
+                        className={`h-full overflow-y-auto p-4 md:p-12 overscroll-contain ${currentView === "animations" ? "block" : "hidden"}`}
                     >
                         <div className="max-w-4xl mx-auto">
                             <form
@@ -258,7 +278,7 @@ export default function Home() {
 
                     {/* Presets View */}
                     <div
-                        className={`h-full overflow-y-auto p-4 md:p-12 ${currentView === "presets" ? "block" : "hidden"}`}
+                        className={`h-full overflow-y-auto p-4 md:p-12 overscroll-contain ${currentView === "presets" ? "block" : "hidden"}`}
                     >
                         <div className="max-w-4xl mx-auto">
                             <PresetsManager
@@ -309,13 +329,28 @@ export default function Home() {
 
             {/* Snackbar */}
             <div
-                className={`fixed bottom-4 right-4 px-6 py-3 rounded shadow-lg text-white transition-all duration-300 transform ${
+                className={`fixed top-24 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 transform ${
                     snackbar.show
                         ? "translate-y-0 opacity-100"
-                        : "translate-y-2 opacity-0 pointer-events-none"
-                } ${snackbar.type === "error" ? "bg-red-600" : "bg-teal-600"}`}
+                        : "-translate-y-8 opacity-0 pointer-events-none"
+                }`}
             >
-                {snackbar.message}
+                <div
+                    className={`flex items-center gap-3 px-6 py-3 rounded-2xl shadow-2xl backdrop-blur-md border border-white/10 text-white min-w-[320px] max-w-[90vw] ${
+                        snackbar.type === "error"
+                            ? "bg-red-500/90 shadow-red-900/20"
+                            : "bg-teal-600/90 shadow-teal-900/20"
+                    }`}
+                >
+                    {snackbar.type === "error" ? (
+                        <AlertCircle className="w-5 h-5 shrink-0" />
+                    ) : (
+                        <CheckCircle2 className="w-5 h-5 shrink-0" />
+                    )}
+                    <span className="text-sm font-medium tracking-wide">
+                        {snackbar.message}
+                    </span>
+                </div>
             </div>
         </div>
     );
