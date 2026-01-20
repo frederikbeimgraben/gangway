@@ -1,7 +1,7 @@
 {
-    "name": "Gangway",
-    "short_name": "Gangway",
-    "description": "Gangway Controller",
+    "name": "GANGWAY",
+    "short_name": "GANGWAY",
+    "description": "G.A.N.G.W.A.Y Controller",
     "icons": [
         {
             "src": "/icons/android-chrome-512x512.png",
