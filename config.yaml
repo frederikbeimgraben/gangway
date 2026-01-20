@@ -68,8 +68,8 @@ strips:
       end:
           - 66.0
           - 225.0
-    - index: 97
-      len: 23
+    - index: 96
+      len: 24
       start:
           - 88.0
           - 210.0
@@ -100,8 +100,8 @@ strips:
       end:
           - 74.0
           - 327.0
-    - index: 193
-      len: 24
+    - index: 192
+      len: 25
       start:
           - 82.5
           - 290.0
@@ -109,7 +109,24 @@ strips:
           - 82.5
           - 490.0
 animation:
-    linear_rainbow:
-        direction: y
-        speed: 0.1
-        spread: 3.0
+    extrapolate:
+        animation:
+            dot:
+                primary:
+                    fire:
+                        base_color:
+                            r: 255
+                            g: 140
+                            b: 0
+                            cw: 0
+                            ww: 0
+                        flicker_speed: 0.1
+                        flicker_intensity: 0.5
+                secondary:
+                    r: 255
+                    g: 255
+                    b: 255
+                    cw: 0
+                    ww: 0
+                radius: 50.0
+        latency: 0.0
