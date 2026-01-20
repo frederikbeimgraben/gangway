@@ -385,3 +385,88 @@ def linear_rainbow(
         return RGBCCT(r=r, g=g, b=b)
 
     return animation
+
+
+def northern_lights(
+    speed: float = 0.5,
+    intensity: float = 0.8,
+) -> Animation:
+    """
+    A flowing animation with green, teal, and purple colors.
+    """
+
+    def animation(
+        time: float,
+        ctx: SceneContext,
+        led: LED,
+        *_args,
+        **_kwargs,
+    ) -> RGBCCT:
+        t = time * speed
+
+        # Normalized coordinates
+        dx = ctx.floor.p2.x - ctx.floor.p1.x
+        dy = ctx.floor.p2.y - ctx.floor.p1.y
+        x_norm = (led.p.x - ctx.floor.p1.x) / (dx if dx != 0 else 1.0)
+        y_norm = (led.p.y - ctx.floor.p1.y) / (dy if dy != 0 else 1.0)
+
+        # Mix multiple sine waves for the "curtain" effect
+        v1 = math.sin(x_norm * 2.0 + t)
+        v2 = math.sin(y_norm * 1.5 - t * 0.7 + v1)
+        v3 = math.sin((x_norm + y_norm) * 3.0 + t * 1.5)
+
+        # Northern lights colors: mostly greens and purples
+        r = (math.sin(v1 + t) * 0.5 + 0.5) * 50  # Some purple/pink
+        g = (math.sin(v2 + t * 0.5) * 0.5 + 0.5) * 200  # Primary green
+        b = (math.sin(v3 - t) * 0.5 + 0.5) * 150  # Deep blue/purple
+
+        return RGBCCT(
+            r=int(r * intensity),
+            g=int(g * intensity),
+            b=int(b * intensity),
+        )
+
+    return animation
+
+
+def lightning_storm(
+    frequency: float = 0.02,
+    base_brightness: float = 0.00,
+) -> Animation:
+    """
+    Occasional bright flashes like a lightning storm.
+    """
+
+    def animation(
+        time: float,
+        _ctx: SceneContext,
+        led: LED,
+        *_args,
+        **_kwargs,
+    ) -> RGBCCT:
+        # Determine if there's a flash happening
+        # Flash duration around 0.2s
+        flash_period = 0.5
+        flash_time = time % flash_period
+        flash_seed = int(time / flash_period)
+
+        rng = random.Random(flash_seed)
+        has_flash = rng.random() < frequency
+
+        if has_flash and flash_time < 0.2:
+            # Flash intensity peaks and then flickers
+            # Use led index to add some spatial variety to the flash
+            led_flicker = random.Random(flash_seed + led.index).random() * 0.4 + 0.6
+            flash_intensity = (
+                math.exp(-flash_time * 15)
+                * led_flicker
+                * (math.sin(time * 100) * 0.2 + 0.8)
+            )
+            val = int(255 * flash_intensity)
+            return RGBCCT(r=val, g=val, b=val, cw=val, ww=val)
+
+        # Background: very dim blue/cool white (stormy clouds)
+        base = int(255 * base_brightness)
+        return RGBCCT(cw=base)
+
+    return animation

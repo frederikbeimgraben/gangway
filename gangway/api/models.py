@@ -229,7 +229,21 @@ class SparkleParams(BaseModel):
     """Parameters for the sparkle animation."""
 
     density: float = Field(default=0.1, ge=0.0, le=1.0)
-    speed: float = Field(default=20.0, ge=0.0)
+    speed: float = Field(default=20.0, ge=0)
+
+
+class NorthernLightsParams(BaseModel):
+    """Parameters for the northern lights animation."""
+
+    speed: float = Field(default=0.5, ge=0)
+    intensity: float = Field(default=0.8, ge=0, le=1.0)
+
+
+class LightningStormParams(BaseModel):
+    """Parameters for the lightning storm animation."""
+
+    frequency: float = Field(default=0.02, ge=0, le=1)
+    base_brightness: float = Field(default=0.00, ge=0, le=1)
 
 
 class PersistParams(BaseModel):
@@ -588,6 +602,32 @@ class SparkleAnimation(BaseModel):
         extra = "forbid"  # Disallow other keys
 
 
+class NorthernLightsAnimation(BaseModel):
+    """Wrapper for the northern lights animation."""
+
+    northern_lights: NorthernLightsParams = Field(
+        ...,
+        title="Northern Lights",
+        description="A flowing animation with green, teal, and purple colors.",
+    )
+
+    class Config:
+        extra = "forbid"  # Disallow other keys
+
+
+class LightningStormAnimation(BaseModel):
+    """Wrapper for the lightning storm animation."""
+
+    lightning_storm: LightningStormParams = Field(
+        ...,
+        title="Lightning Storm",
+        description="Occasional bright flashes like a lightning storm.",
+    )
+
+    class Config:
+        extra = "forbid"  # Disallow other keys
+
+
 class PersistAnimation(BaseModel):
     """Wrapper for the persist animation."""
 
@@ -688,6 +728,8 @@ AnimationModel = Union[
     SmoothAnimation,
     PlasmaAnimation,
     SparkleAnimation,
+    NorthernLightsAnimation,
+    LightningStormAnimation,
     ProximityAnimation,
     ProximitySpeedAnimation,
     PersistAnimation,
@@ -722,3 +764,10 @@ ScheduleParams.model_rebuild()
 PaintParams.model_rebuild()
 LinearRainbowParams.model_rebuild()
 SmoothParams.model_rebuild()
+PlasmaParams.model_rebuild()
+SparkleParams.model_rebuild()
+NorthernLightsParams.model_rebuild()
+LightningStormParams.model_rebuild()
+ProximityParams.model_rebuild()
+ProximitySpeedParams.model_rebuild()
+PersistParams.model_rebuild()
